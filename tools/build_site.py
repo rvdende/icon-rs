@@ -15,14 +15,16 @@ crate = re.search(r'^name\s*=\s*"([^"]+)"', cargo, re.M).group(1)
 version = re.search(r'^version\s*=\s*"([^"]+)"', cargo, re.M).group(1)
 
 shutil.rmtree(OUT, ignore_errors=True)
-os.makedirs(os.path.join(OUT, "icons"))
+os.makedirs(os.path.join(OUT, "icons", "dark"))
 for icon in icons:
-    shutil.copy(os.path.join(ROOT, "icons", f"{icon['name']}.svg"), os.path.join(OUT, "icons"))
+    for sub in ("", "dark"):
+        shutil.copy(os.path.join(ROOT, "icons", sub, f"{icon['name']}.svg"), os.path.join(OUT, "icons", sub))
 open(os.path.join(OUT, ".nojekyll"), "w").close()
 
 tiles = "\n".join(
     f'      <button class="tile" data-name="{html.escape(i["name"])}">'
-    f'<img src="icons/{html.escape(i["name"])}.svg" alt="" width="85" height="85">'
+    f'<picture><source srcset="icons/dark/{html.escape(i["name"])}.svg" media="(prefers-color-scheme: dark)">'
+    f'<img src="icons/{html.escape(i["name"])}.svg" alt="" width="85" height="85"></picture>'
     f'<span>{html.escape(i["name"])}</span></button>'
     for i in icons
 )
@@ -40,15 +42,16 @@ page = """<!doctype html>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #fafafa; --surface: #ffffff; --tile: #ffffff; --tile-hover: #f4f4f5;
+    --bg: #fafafa; --surface: #ffffff; --tile: #ffffff; --tile-hover: #f4f4f5; --tile-text: #3f3f46; --preview-bg: #ffffff;
     --border: #e4e4e7; --text: #18181b; --muted: #71717a; --accent: #2563eb;
     --code-bg: #f4f4f5; --code-text: #27272a; --code-comment: #8a8a93; --code-string: #0f766e;
     --scrim: rgba(24, 24, 27, 0.45);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0f0f11; --surface: #18181b; --tile: #f4f4f5; --tile-hover: #ffffff;
+      --bg: #0f0f11; --surface: #18181b;
       --border: #2e2e33; --text: #f4f4f5; --muted: #a1a1aa; --accent: #60a5fa;
+      --tile: #18181b; --tile-hover: #222226; --tile-text: #d4d4d8; --preview-bg: #0f0f11;
       --code-bg: #0f0f11; --code-text: #e4e4e7; --code-comment: #71717a; --code-string: #5eead4;
       --scrim: rgba(0, 0, 0, 0.6);
     }
@@ -78,12 +81,13 @@ page = """<!doctype html>
   .tile {
     display: flex; flex-direction: column; align-items: center; gap: 10px;
     padding: 18px 6px 12px; border: 1px solid var(--border); border-radius: 12px;
-    background: var(--tile); color: #3f3f46; font: 500 13px/1.2 Inter, system-ui, sans-serif;
+    background: var(--tile); color: var(--tile-text); font: 500 13px/1.2 Inter, system-ui, sans-serif;
     cursor: pointer; transition: background .12s, border-color .12s, transform .12s;
   }
   .tile:hover { background: var(--tile-hover); border-color: var(--accent); }
   .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .tile:active { transform: scale(0.98); }
+  .tile picture { display: contents; }
   .tile img { width: clamp(44px, 8.2vw, 85px); height: auto; aspect-ratio: 1; }
   .tile span { overflow-wrap: anywhere; text-align: center; }
 
@@ -95,7 +99,7 @@ page = """<!doctype html>
   dialog::backdrop { background: var(--scrim); }
   .sheet-head { display: flex; align-items: center; gap: 16px; padding: 20px 20px 0; }
   .sheet-head .preview {
-    flex: none; width: 96px; height: 96px; border-radius: 12px; background: #fff;
+    flex: none; width: 96px; height: 96px; border-radius: 12px; background: var(--preview-bg);
     border: 1px solid var(--border); display: grid; place-items: center;
   }
   .sheet-head .preview img { width: 72px; height: 72px; }
@@ -145,11 +149,11 @@ __TILES__
 
   <dialog id="sheet" aria-labelledby="sheet-title">
     <div class="sheet-head">
-      <div class="preview"><img id="sheet-img" alt=""></div>
+      <div class="preview"><picture><source id="sheet-img-dark" media="(prefers-color-scheme: dark)"><img id="sheet-img" alt=""></picture></div>
       <div>
         <h2 id="sheet-title"></h2>
         <code id="sheet-const"></code>
-        <div class="actions"><a id="sheet-download" download>Download SVG</a></div>
+        <div class="actions"><a id="sheet-download" download>Download SVG</a><a id="sheet-download-dark" download>Dark SVG</a></div>
       </div>
       <button class="close" aria-label="Close">&times;</button>
     </div>
@@ -169,13 +173,20 @@ const sheet = document.getElementById("sheet");
 
 function rustSnippet(i) {
   return `// Cargo.toml: ${CRATE} = "${VERSION}"
-use icon_rs::${i.konst};
+use icon_rs::{Palette, ${i.konst}};
 
-// The raw SVG source, embedded at compile time.
-let svg: &str = ${i.konst}.svg;
+// SVG source for light and dark themes, embedded at compile time.
+let light: &str = ${i.konst}.svg;
+let dark: &str = ${i.konst}.svg_dark;
 
-// Or look it up by name at runtime.
-let icon = icon_rs::get("${i.name}").unwrap();`;
+// Or look it up by name and pick the variant for the theme.
+let svg = icon_rs::get("${i.name}").unwrap().themed(is_dark);
+
+// Or recolour it for your own theme.
+let custom: String = ${i.konst}.recolor(&Palette {
+    ink: "#1e293b", top: "#f8fafc", soft: "#cbd5e1",
+    mid: "#94a3b8", shade: "#64748b",
+});`;
 }
 
 function resvgSnippet(i) {
@@ -208,9 +219,13 @@ function open(name) {
   document.getElementById("sheet-title").textContent = i.name;
   document.getElementById("sheet-const").textContent = `icon_rs::${i.konst}`;
   document.getElementById("sheet-img").src = `icons/${i.name}.svg`;
+  document.getElementById("sheet-img-dark").srcset = `icons/dark/${i.name}.svg`;
   const dl = document.getElementById("sheet-download");
   dl.href = `icons/${i.name}.svg`;
   dl.setAttribute("download", `${i.name}.svg`);
+  const dld = document.getElementById("sheet-download-dark");
+  dld.href = `icons/dark/${i.name}.svg`;
+  dld.setAttribute("download", `${i.name}-dark.svg`);
   for (const [id, fn] of [["code-rust", rustSnippet], ["code-resvg", resvgSnippet]]) {
     const pre = document.getElementById(id);
     pre.dataset.raw = fn(i);

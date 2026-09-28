@@ -1,8 +1,15 @@
-"""Regenerates icons/*.svg. Run from anywhere: python3 tools/gen_icons.py"""
+"""Regenerates icons/*.svg and icons/dark/*.svg. Run from anywhere: python3 tools/gen_icons.py
+
+Icons are drawn with the light palette. The dark variant swaps each palette colour for its
+counterpart in DARK_PALETTE; src/lib.rs's Palette uses the same five slots, in the same order.
+"""
 import math, os
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "icons")
-INK, LIGHT, MID, DARK = "#262626", "#ffffff", "#a3a3a3", "#737373"
+# Palette slots: outline ink, top face, soft face, mid face, shaded face.
+INK, LIGHT, SOFT, MID, DARK = "#262626", "#ffffff", "#d4d4d4", "#a3a3a3", "#737373"
+DARK_PALETTE = {INK: "#e4e4e7", LIGHT: "#a1a1aa", SOFT: "#8b8b94", MID: "#71717a", DARK: "#52525b"}
+os.makedirs(os.path.join(OUT, "dark"), exist_ok=True)
 C, S = math.cos(math.pi / 6), 0.5
 
 
@@ -49,6 +56,10 @@ def svg(name, body):
            f'  {body}\n</svg>\n')
     with open(os.path.join(OUT, f"{name}.svg"), "w") as f:
         f.write(doc)
+    for light, dark in DARK_PALETTE.items():
+        doc = doc.replace(light, dark)
+    with open(os.path.join(OUT, "dark", f"{name}.svg"), "w") as f:
+        f.write(doc)
 
 
 # Extrude: a solid slab grown from its footprint, dashed ghost of the target height, arrow up.
@@ -79,15 +90,35 @@ svg("revolve", "\n  ".join([
     f'<polygon points="{pts([tip, (base[0] + nx, base[1] + ny), (base[0] - nx, base[1] - ny)])}" fill="{INK}"/>',
 ]))
 
-# Sweep: circular profile carried along a dashed S path; the swept part is a solid tube.
-path = "M4 20 C4 12, 12 16, 12 10 S20 4, 20 4"
+# Sweep: a round profile carried along a dashed path; the swept part is a solid tube whose
+# outline is offset from the spine, so it stays crisp at 1x.
+def cubic(p0, p1, p2, p3, t):
+    u = 1 - t
+    return tuple(u**3 * a + 3 * u * u * t * b + 3 * u * t * t * c + t**3 * d for a, b, c, d in zip(p0, p1, p2, p3))
+
+spine = [(4.5, 21), (4.5, 13.5), (9.5, 15.5), (12.5, 10.5)]
+r = 2.3
+samples = [cubic(*spine, i / 24) for i in range(25)]
+def offset(k):
+    out = []
+    for i, (x, y) in enumerate(samples):
+        a, b = samples[max(i - 1, 0)], samples[min(i + 1, len(samples) - 1)]
+        tx, ty = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(tx, ty)
+        out.append((x - ty / L * k, y + tx / L * k))
+    return out
+left, right = offset(r), offset(-r)
+ex, ey = samples[-1]
+tx, ty = samples[-1][0] - samples[-2][0], samples[-1][1] - samples[-2][1]
+cap_angle = math.degrees(math.atan2(ty, tx)) + 90
 svg("sweep", "\n  ".join([
-    f'<path d="{path}" stroke-dasharray="1.4 1.2" stroke-width="0.9"/>',
-    # tube over the first half of the path, drawn as a thick stroke with an outline
-    f'<path d="M4 20 C4 15, 8.5 14.5, 10.6 12.6" stroke="{INK}" stroke-width="5.4" stroke-linecap="butt"/>',
-    f'<path d="M4 20 C4 15, 8.5 14.5, 10.6 12.6" stroke="{MID}" stroke-width="3.2" stroke-linecap="butt"/>',
-    f'<ellipse cx="11.4" cy="11.8" rx="1.6" ry="2.9" transform="rotate(45 11.4 11.8)" fill="{LIGHT}"/>',
-    f'<ellipse cx="4" cy="20.6" rx="2.7" ry="1.1" fill="{DARK}"/>',
+    '<path d="M12.5 10.5 C15 6.5, 17 6, 20.5 3.5" stroke-dasharray="1.4 1.2" stroke-width="0.9"/>',
+    f'<ellipse cx="4.5" cy="21" rx="{r}" ry="1" fill="{MID}"/>',
+    poly(left + right[::-1], MID, ' stroke="none"'),
+    f'<polyline points="{pts(offset(r * 0.35))}" stroke="{LIGHT}" stroke-width="0.9" stroke-opacity="0.7"/>',
+    f'<polyline points="{pts(left)}"/>',
+    f'<polyline points="{pts(right)}"/>',
+    f'<ellipse cx="{ex:.2f}" cy="{ey:.2f}" rx="{r}" ry="1" transform="rotate({cap_angle:.1f} {ex:.2f} {ey:.2f})" fill="{LIGHT}"/>',
 ]))
 
 # Loft: square section at the bottom blended into a round section at the top.
@@ -134,7 +165,7 @@ svg("fillet", "\n  ".join([
 c = 3.5
 svg("chamfer", "\n  ".join([
     poly([P(0, 0, 8), P(8 - c, 0, 8), P(8 - c, 8, 8), P(0, 8, 8)], LIGHT),
-    poly([P(8 - c, 0, 8), P(8, 0, 8 - c), P(8, 8, 8 - c), P(8 - c, 8, 8)], "#d4d4d4"),
+    poly([P(8 - c, 0, 8), P(8, 0, 8 - c), P(8, 8, 8 - c), P(8 - c, 8, 8)], SOFT),
     poly([P(8, 0, 8 - c), P(8, 0, 0), P(8, 8, 0), P(8, 8, 8 - c)], MID),
     poly([P(0, 8, 8), P(8 - c, 8, 8), P(8, 8, 8 - c), P(8, 8, 0), P(0, 8, 0)], DARK),
 ]))
