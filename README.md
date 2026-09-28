@@ -3,17 +3,18 @@
 Original SVG icons for CAD feature tools (extrude, revolve, sweep, loft, thicken, enclose, fillet,
 chamfer, shell, pattern, boolean), embedded as Rust constants.
 
-Browse the icons: https://rvdende.github.io/icon-rs/
+Browse the icons and try out palettes: https://rvdende.github.io/icon-rs/
 
 ```rust
-use icon_rs::{Palette, EXTRUDE};
+use icon_rs::{Palette, Rgb, EXTRUDE};
 
 let light: &str = EXTRUDE.svg;       // for light backgrounds
 let dark: &str = EXTRUDE.svg_dark;   // for dark backgrounds
 let svg = icon_rs::get("loft").unwrap().themed(is_dark);
 
-// Any other theme: swap the five palette colours.
-let custom: String = EXTRUDE.recolor(&Palette { ink: "#1e293b", ..Palette::LIGHT });
+// Any other theme: a line colour plus one spot colour, shaded automatically.
+let palette = Palette::from_spot(Rgb(0x0c, 0x4a, 0x6e), Rgb(0x38, 0xbd, 0xf8));
+let custom: String = EXTRUDE.recolor(&palette);
 ```
 
 - `icons/*.svg`, `icons/dark/*.svg`: 24x24, outline plus four face shades, lit from the same

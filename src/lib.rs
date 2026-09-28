@@ -22,49 +22,106 @@ impl Icon {
 
     /// The light SVG with every palette colour replaced by the matching slot in `palette`.
     pub fn recolor(&self, palette: &Palette) -> String {
-        Palette::LIGHT
-            .slots()
-            .into_iter()
-            .zip(palette.slots())
-            .fold(self.svg.to_owned(), |svg, (from, to)| svg.replace(from, to))
+        // Two passes through placeholders, so a new colour that equals a later light slot is
+        // not replaced again.
+        let placeholder = |slot: usize| format!("#\0{slot}");
+        let mut svg = self.svg.to_owned();
+        for (slot, from) in Palette::LIGHT.slots().into_iter().enumerate() {
+            svg = svg.replace(&from.to_hex(), &placeholder(slot));
+        }
+        for (slot, to) in palette.slots().into_iter().enumerate() {
+            svg = svg.replace(&placeholder(slot), &to.to_hex());
+        }
+        svg
     }
 }
 
-/// The five colours an icon is drawn with, as `#rrggbb` strings.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// An sRGB colour.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Rgb(pub u8, pub u8, pub u8);
+
+impl Rgb {
+    pub const WHITE: Rgb = Rgb(0xff, 0xff, 0xff);
+    pub const BLACK: Rgb = Rgb(0, 0, 0);
+
+    /// Parses `#rrggbb` or `rrggbb`.
+    pub fn from_hex(hex: &str) -> Option<Rgb> {
+        let hex = hex.strip_prefix('#').unwrap_or(hex);
+        if hex.len() != 6 || !hex.is_ascii() {
+            return None;
+        }
+        let channel = |i: usize| u8::from_str_radix(&hex[i..i + 2], 16).ok();
+        Some(Rgb(channel(0)?, channel(2)?, channel(4)?))
+    }
+
+    /// Lowercase `#rrggbb`, the form the SVGs use.
+    pub fn to_hex(self) -> String {
+        format!("#{:02x}{:02x}{:02x}", self.0, self.1, self.2)
+    }
+
+    /// Moves `percent` of the way towards `other`, rounding to the nearest channel value.
+    pub fn mix(self, other: Rgb, percent: u32) -> Rgb {
+        let percent = percent.min(100);
+        let channel = |a: u8, b: u8| ((a as u32 * (100 - percent) + b as u32 * percent + 50) / 100) as u8;
+        Rgb(channel(self.0, other.0), channel(self.1, other.1), channel(self.2, other.2))
+    }
+
+    /// Perceived brightness, 0 to 255 (Rec. 601 weights).
+    pub fn luma(self) -> u32 {
+        (self.0 as u32 * 299 + self.1 as u32 * 587 + self.2 as u32 * 114) / 1000
+    }
+}
+
+/// The five colours an icon is drawn with.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Palette {
     /// Outlines and arrow heads.
-    pub ink: &'static str,
+    pub ink: Rgb,
     /// Faces that point up, and profile caps.
-    pub top: &'static str,
+    pub top: Rgb,
     /// Bevel faces between top and side.
-    pub soft: &'static str,
+    pub soft: Rgb,
     /// Right-hand side faces and swept bodies.
-    pub mid: &'static str,
+    pub mid: Rgb,
     /// Left-hand side faces, in shadow.
-    pub shade: &'static str,
+    pub shade: Rgb,
 }
 
 impl Palette {
     /// The colours `Icon::svg` is drawn with.
     pub const LIGHT: Palette = Palette {
-        ink: "#262626",
-        top: "#ffffff",
-        soft: "#d4d4d4",
-        mid: "#a3a3a3",
-        shade: "#737373",
+        ink: Rgb(0x26, 0x26, 0x26),
+        top: Rgb(0xff, 0xff, 0xff),
+        soft: Rgb(0xd4, 0xd4, 0xd4),
+        mid: Rgb(0xa3, 0xa3, 0xa3),
+        shade: Rgb(0x73, 0x73, 0x73),
     };
 
     /// The colours `Icon::svg_dark` is drawn with.
     pub const DARK: Palette = Palette {
-        ink: "#e4e4e7",
-        top: "#a1a1aa",
-        soft: "#8b8b94",
-        mid: "#71717a",
-        shade: "#52525b",
+        ink: Rgb(0xe4, 0xe4, 0xe7),
+        top: Rgb(0xa1, 0xa1, 0xaa),
+        soft: Rgb(0x8b, 0x8b, 0x94),
+        mid: Rgb(0x71, 0x71, 0x7a),
+        shade: Rgb(0x52, 0x52, 0x5b),
     };
 
-    fn slots(&self) -> [&'static str; 5] {
+    /// Builds a palette from a line colour and one spot colour. The spot fills side faces; the
+    /// top and bevel faces are tinted towards white and the shaded faces towards black. When the
+    /// line is lighter than the spot (a dark theme) the tints are gentler, so top faces don't
+    /// glare against a dark background.
+    pub fn from_spot(ink: Rgb, spot: Rgb) -> Palette {
+        let (top, soft, shade) = if ink.luma() > spot.luma() { (35, 18, 28) } else { (85, 45, 30) };
+        Palette {
+            ink,
+            top: spot.mix(Rgb::WHITE, top),
+            soft: spot.mix(Rgb::WHITE, soft),
+            mid: spot,
+            shade: spot.mix(Rgb::BLACK, shade),
+        }
+    }
+
+    fn slots(&self) -> [Rgb; 5] {
         [self.ink, self.top, self.soft, self.mid, self.shade]
     }
 }
@@ -141,11 +198,42 @@ mod tests {
         for icon in ALL {
             let mut rest = icon.svg;
             while let Some(at) = rest.find("=\"#") {
-                let hex = &rest[at + 2..at + 9];
-                assert!(Palette::LIGHT.slots().contains(&hex), "{} uses {hex}", icon.name);
+                let hex = Rgb::from_hex(&rest[at + 2..at + 9]).unwrap();
+                assert!(Palette::LIGHT.slots().contains(&hex), "{} uses {hex:?}", icon.name);
                 rest = &rest[at + 9..];
             }
         }
+    }
+
+    #[test]
+    fn recolor_does_not_chain_replacements() {
+        // The new ink equals the light palette's top colour; outlines must stay white.
+        let palette = Palette { ink: Palette::LIGHT.top, top: Rgb(1, 2, 3), ..Palette::LIGHT };
+        let svg = SHELL.recolor(&palette);
+        assert!(svg.contains(r##"stroke="#ffffff""##));
+        assert!(svg.contains(r##"fill="#010203""##));
+    }
+
+    #[test]
+    fn hex_round_trip() {
+        assert_eq!(Rgb::from_hex("#38bdf8"), Some(Rgb(0x38, 0xbd, 0xf8)));
+        assert_eq!(Rgb::from_hex("38BDF8"), Some(Rgb(0x38, 0xbd, 0xf8)));
+        assert_eq!(Rgb(0x38, 0xbd, 0xf8).to_hex(), "#38bdf8");
+        assert_eq!(Rgb::from_hex("#38bdf"), None);
+        assert_eq!(Rgb::from_hex("#38bdfg"), None);
+    }
+
+    #[test]
+    fn from_spot_shades_the_spot() {
+        // Values the site's JavaScript port also produces; keep the two in step.
+        let light = Palette::from_spot(Rgb(0x26, 0x26, 0x26), Rgb(0xa3, 0xa3, 0xa3));
+        assert_eq!(light.top, Rgb(0xf1, 0xf1, 0xf1));
+        assert_eq!(light.soft, Rgb(0xcc, 0xcc, 0xcc));
+        assert_eq!(light.shade, Rgb(0x72, 0x72, 0x72));
+
+        let dark = Palette::from_spot(Rgb(0xe4, 0xe4, 0xe7), Rgb(0x71, 0x71, 0x7a));
+        assert_eq!(dark.top, Rgb(0xa3, 0xa3, 0xa9));
+        assert_eq!(dark.shade, Rgb(0x51, 0x51, 0x58));
     }
 
     #[test]
