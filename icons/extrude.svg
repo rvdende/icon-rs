@@ -1,8 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#262626" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
-  <polygon points="12,8.3 18.93,12.3 12,16.3 5.07,12.3" fill="#ffffff"/>
-  <polygon points="18.93,12.3 12,16.3 12,20.8 18.93,16.8" fill="#a3a3a3"/>
-  <polygon points="5.07,12.3 12,16.3 12,20.8 5.07,16.8" fill="#737373"/>
-  <circle cx="12" cy="12.3" r="1" fill="#2563eb" stroke="none"/>
-  <line x1="12" y1="12.3" x2="12" y2="6.22" stroke="#2563eb" stroke-width="1.5"/>
-  <polygon points="12,3.5 13.6,6.9 10.4,6.9" fill="#2563eb" stroke="#2563eb"/>
+  <polygon points="12,9.9 18.93,13.9 12,17.9 5.07,13.9" fill="#ffffff"/>
+  <polygon points="18.93,13.9 12,17.9 12,21.9 18.93,17.9" fill="#a3a3a3"/>
+  <polygon points="5.07,13.9 12,17.9 12,21.9 5.07,17.9" fill="#737373"/>
+  <polygon points="18.93,7.9 12,11.9 12,17.9 18.93,13.9" fill="#2563eb" stroke="none" fill-opacity="0.16"/>
+  <polygon points="5.07,7.9 12,11.9 12,17.9 5.07,13.9" fill="#2563eb" stroke="none" fill-opacity="0.16"/>
+  <polygon points="12,3.9 18.93,7.9 12,11.9 5.07,7.9" stroke="#2563eb" stroke-width="1.1" stroke-dasharray="1.1 2.7"/>
+  <line x1="18.93" y1="13.9" x2="18.93" y2="7.9" stroke="#2563eb" stroke-width="1.1" stroke-dasharray="1.1 2.7"/>
+  <line x1="12" y1="17.9" x2="12" y2="11.9" stroke="#2563eb" stroke-width="1.1" stroke-dasharray="1.1 2.7"/>
+  <line x1="5.07" y1="13.9" x2="5.07" y2="7.9" stroke="#2563eb" stroke-width="1.1" stroke-dasharray="1.1 2.7"/>
+  <line x1="12" y1="13.9" x2="12" y2="8.26"/>
+  <polygon points="12,5.7 13.5,8.9 10.5,8.9" fill="#262626" stroke-width="0.6"/>
 </svg>

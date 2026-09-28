@@ -32,30 +32,34 @@ def _cube(o, s=8, **kw):
 
 @icon("extrude", "solid", "Extrude")
 def extrude():
-    o = (12, 12.8)
+    # The operation, not just the result: the profile's slab, and the volume the extrude will add
+    # as a dashed accent ghost with an arrow rising through it.
+    o = (12, 13.9)
     P = projector(o)
+    s, z0, z1 = 8, 4, 10
+    ghost = 'stroke="none" fill-opacity="0.16"'
+    edge = f'stroke="{ACCENT}" ' + dash(1.1)
     return [
-        box(o, 0, 8, 0, 8, 0, 4.5),
-        circle(*P(4, 4, 4.5), 1, ACCENT, 'stroke="none"'),
-        arrow(*P(4, 4, 4.5), *P(4, 4, 13.3), 3.4, 3.2, ACCENT, 'stroke-width="1.5"'),
+        box(o, 0, s, 0, s, 0, z0),
+        poly([P(s, 0, z1), P(s, s, z1), P(s, s, z0), P(s, 0, z0)], ACCENT, ghost),
+        poly([P(0, s, z1), P(s, s, z1), P(s, s, z0), P(0, s, z0)], ACCENT, ghost),
+        poly([P(0, 0, z1), P(s, 0, z1), P(s, s, z1), P(0, s, z1)], None, edge),
+        *[line(*P(x, y, z0), *P(x, y, z1), edge) for x, y in ((s, 0), (s, s), (0, s))],
+        arrow(*P(s / 2, s / 2, z0), *P(s / 2, s / 2, z1 + 2.2), 3.2, 3),
     ]
 
 
 @icon("revolve", "solid", "Revolve")
 def revolve():
-    o = (12, 16.7)
-    P = projector(o)
-    k = 1 / math.sqrt(2)
-    # The profile lies in the plane through the axis that faces the viewer (direction x = -y).
-    prof = [(0, 0), (5.6, 0), (5.6, 2.4), (2.6, 2.4), (2.6, 9), (0, 9)]
-    zr, r = 5, 7
-    back = _ring(P, 0, 0, zr, r, 160, 315)
-    front = _ring(P, 0, 0, zr, r, 315, 465)
+    # A flat profile beside a dash-dot axis, and the accent sweep arrow wrapping the axis: behind
+    # the profile at the back, in front of it at the front.
+    cx, cy, rx, ry = 9, 12, 6.5, 2.4
+    arc = 'stroke-width="1.4"'
     return [
-        polyline(back, _acc(1.5)),
-        poly([P(u * k, -u * k, z) for u, z in prof], MID),
-        line(*P(0, 0, -3), *P(0, 0, 12.4), dash_dot(0.9)),
-        curved_arrow(front, 3.4, 3.2, ACCENT, 'stroke-width="1.5"'),
+        polyline(arc_points(cx, cy, rx, ry, 200, 340), f'stroke="{ACCENT}" ' + arc),
+        path("M11.5 5.5 h7 v10 l-3 3 h-4 z", MID),
+        line(9, 2, 9, 22, dash_dot(0.9)),
+        curved_arrow(arc_points(cx, cy, rx, ry, 340, 520), 3.2, 2.8, ACCENT, arc),
     ]
 
 
@@ -84,27 +88,16 @@ def sweep():
 
 @icon("loft", "solid", "Loft")
 def loft():
-    o = (12, 11.6)
-    P = projector(o)
-    s = 9
-    bot = [P(0, 0, 0), P(s, 0, 0), P(s, s, 0), P(0, s, 0)]
-    c = (s / 2, s / 2)
-    zt, rt = 10.5, 3.3
-    top = iso_circle(o, *c, zt, rt, 48)
-    tl = min(top, key=lambda p: p[0])
-    tr = max(top, key=lambda p: p[0])
-    front = P(s, s, 0)
-    fe = max(top, key=lambda p: p[1])  # front of the top ellipse
-    body = (f"M{f(bot[3][0])} {f(bot[3][1])} L{f(tl[0])} {f(tl[1])} L{f(tr[0])} {f(tr[1])} "
-            f"L{f(bot[1][0])} {f(bot[1][1])} L{f(front[0])} {f(front[1])} Z")
-    seam = (f"M{f(fe[0])} {f(fe[1])} C{f(fe[0])} {f(fe[1] + 4)} {f(front[0])} {f(front[1] - 4)} "
-            f"{f(front[0])} {f(front[1])} L{f(bot[1][0])} {f(bot[1][1])} L{f(tr[0])} {f(tr[1])} Z")
+    # X-ray view: the body blends a square base into a round top, and dashed hidden edges show
+    # the whole base profile through it. Both profiles are accent: they are what the loft joins.
+    base_front = [(5, 18), (12, 21.5), (19, 18)]
+    base_back = [(5, 18), (12, 14.5), (19, 18)]
     return [
-        path(body, SHADE, 'stroke="none"'),
-        path(seam, MID, 'stroke="none"'),
-        path(body, None),
-        poly(top, TOP, _acc(1.4)),
-        polyline([bot[3], front, bot[1]], _acc(1.4)),
+        path("M5 18 L7.5 6.5 A4.5 1.8 0 0 0 16.5 6.5 L19 18 L12 21.5 Z", MID),
+        path("M12 21.5 C12 15, 12 11, 12 8.3", None, 'stroke-width="0.8"'),
+        polyline(base_back, f'stroke="{ACCENT}" ' + dash(0.9)),
+        polyline(base_front, f'stroke="{ACCENT}" stroke-width="1.4"'),
+        ellipse(12, 6.5, 4.5, 1.8, TOP, f'stroke="{ACCENT}" stroke-width="1.4"'),
     ]
 
 
