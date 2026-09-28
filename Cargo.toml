@@ -1,0 +1,19 @@
+[package]
+name = "icon-rs"
+version = "0.1.0"
+edition = "2024"
+description = "SVG icon set for CAD feature tools"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rvdende/icon-rs"
+homepage = "https://rvdende.github.io/icon-rs/"
+documentation = "https://docs.rs/icon-rs"
+readme = "README.md"
+keywords = ["icons", "svg", "cad", "ui"]
+categories = ["gui", "graphics"]
+exclude = ["/.github", "/site", "/tools/build_site.py"]
+
+[lib]
+name = "icon_rs"
+
+[dev-dependencies]
+resvg = "0.48"
