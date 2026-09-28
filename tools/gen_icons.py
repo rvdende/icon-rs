@@ -90,35 +90,34 @@ svg("revolve", "\n  ".join([
     f'<polygon points="{pts([tip, (base[0] + nx, base[1] + ny), (base[0] - nx, base[1] - ny)])}" fill="{INK}"/>',
 ]))
 
-# Sweep: a round profile carried along a dashed path; the swept part is a solid tube whose
-# outline is offset from the spine, so it stays crisp at 1x.
+# Sweep: one thick tube with an S bend, its round profile showing as a light cap at the near end.
+# The outline is offset from the spine, so it stays crisp at 1x.
 def cubic(p0, p1, p2, p3, t):
     u = 1 - t
     return tuple(u**3 * a + 3 * u * u * t * b + 3 * u * t * t * c + t**3 * d for a, b, c, d in zip(p0, p1, p2, p3))
 
-spine = [(4.5, 21), (4.5, 13.5), (9.5, 15.5), (12.5, 10.5)]
-r = 2.3
-samples = [cubic(*spine, i / 24) for i in range(25)]
+spine = [(19, 5.5), (10, 4.5), (15, 18.5), (5.5, 18)]
+r = 2.7
+samples = [cubic(*spine, i / 40) for i in range(41)]
+def tangent(i):
+    a, b = samples[max(i - 1, 0)], samples[min(i + 1, len(samples) - 1)]
+    L = math.hypot(b[0] - a[0], b[1] - a[1])
+    return (b[0] - a[0]) / L, (b[1] - a[1]) / L
 def offset(k):
-    out = []
-    for i, (x, y) in enumerate(samples):
-        a, b = samples[max(i - 1, 0)], samples[min(i + 1, len(samples) - 1)]
-        tx, ty = b[0] - a[0], b[1] - a[1]
-        L = math.hypot(tx, ty)
-        out.append((x - ty / L * k, y + tx / L * k))
-    return out
+    return [(x - tangent(i)[1] * k, y + tangent(i)[0] * k) for i, (x, y) in enumerate(samples)]
+def cap(i, fill):
+    (x, y), (tx, ty) = samples[i], tangent(i)
+    angle = math.degrees(math.atan2(ty, tx)) + 90
+    return f'<ellipse cx="{x:.2f}" cy="{y:.2f}" rx="{r}" ry="1.25" transform="rotate({angle:.1f} {x:.2f} {y:.2f})" fill="{fill}"/>'
 left, right = offset(r), offset(-r)
-ex, ey = samples[-1]
-tx, ty = samples[-1][0] - samples[-2][0], samples[-1][1] - samples[-2][1]
-cap_angle = math.degrees(math.atan2(ty, tx)) + 90
 svg("sweep", "\n  ".join([
-    '<path d="M12.5 10.5 C15 6.5, 17 6, 20.5 3.5" stroke-dasharray="1.4 1.2" stroke-width="0.9"/>',
-    f'<ellipse cx="4.5" cy="21" rx="{r}" ry="1" fill="{MID}"/>',
+    cap(len(samples) - 1, MID),  # far end: only the outer half shows past the tube body
     poly(left + right[::-1], MID, ' stroke="none"'),
-    f'<polyline points="{pts(offset(r * 0.35))}" stroke="{LIGHT}" stroke-width="0.9" stroke-opacity="0.7"/>',
+    f'<polyline points="{pts(offset(-r * 0.45))}" stroke="{DARK}" stroke-width="1.3" stroke-opacity="0.55"/>',
+    f'<polyline points="{pts(offset(r * 0.4))}" stroke="{LIGHT}" stroke-width="1" stroke-opacity="0.6"/>',
     f'<polyline points="{pts(left)}"/>',
     f'<polyline points="{pts(right)}"/>',
-    f'<ellipse cx="{ex:.2f}" cy="{ey:.2f}" rx="{r}" ry="1" transform="rotate({cap_angle:.1f} {ex:.2f} {ey:.2f})" fill="{LIGHT}"/>',
+    cap(0, LIGHT),
 ]))
 
 # Loft: square section at the bottom blended into a round section at the top.
