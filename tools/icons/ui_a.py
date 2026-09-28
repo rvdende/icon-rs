@@ -401,6 +401,13 @@ def stop():
     return [rect(6, 6, 12, 12, 1.5, INK)]
 
 
+@icon("play", "line", "Play")
+def play():
+    # A filled triangle pointing right, as a media player's play button: as tall as Stop, and
+    # nudged right of the box centre so its mass sits in the middle.
+    return [poly([(7.5, 5.5), (18.75, 12), (7.5, 18.5)], INK)]
+
+
 @icon("visible", "line", "Visible")
 def visible():
     return [path(_d(_eye_pts())), _acc(circle(12, 12, 3))]
@@ -420,6 +427,18 @@ def lock_filled():
     keyhole = _stroke_outline([(12, 14.5), (12, 17)], 2.5)
     return [
         _acc(path("M8 10.5 V8 A4 4 0 0 1 16 8 V10.5")),
+        _knockout(_d(body), [keyhole]),
+    ]
+
+
+@icon("lock-open", "line", "Unlocked")
+def lock_open():
+    # lock-filled with the shackle raised and swung free on the right: its left leg still runs
+    # into the body, its right leg stops short of it.
+    body = _rounded([(4.1, 10.1), (19.9, 10.1), (19.9, 21.4), (4.1, 21.4)], 3)
+    keyhole = _stroke_outline([(12, 14.5), (12, 17)], 2.5)
+    return [
+        _acc(path("M8 10.5 V6.5 A4 4 0 0 1 16 6.5 V7.5")),
         _knockout(_d(body), [keyhole]),
     ]
 

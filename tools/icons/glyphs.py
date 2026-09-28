@@ -213,3 +213,11 @@ def mate_limits():
     # A range with stops: two short bars and a double arrow between them.
     return [line(6.5, 3, 17.5, 3), line(6.5, 21, 17.5, 21),
             arrow(12, 12, 12, 6.8, 3.6, 5, ACCENT), arrow(12, 12, 12, 17.2, 3.6, 5, ACCENT)]
+
+
+@icon("origin-fastened", "glyph", "Fastened to origin")
+def origin_fastened():
+    # The origin (a ring round a filled point) standing on hatched ground: an assembly fixed in
+    # place at the origin. The ground matches constraint-fix; the ring sets it apart.
+    return [circle(12, 7.5, 5), dot(12, 7.5, 2.2, ACCENT), line(12, 12.5, 12, 16.5),
+            line(3.5, 16.5, 20.5, 16.5), *[line(x, 16.5, x - 3.5, 21) for x in (8.5, 14.5, 20.5)]]

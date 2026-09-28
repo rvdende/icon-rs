@@ -455,6 +455,32 @@ def bill_of_materials():
     return els
 
 
+@icon("standard-content", "solid", "Standard content")
+def standard_content():
+    # A hex-head bolt, from the side: the head a hexagonal prism, the shank a cylinder with a few
+    # thread lines across its front. Neutral, like part: it is a stock part, not an operation.
+    o = (12, 17.5)
+    P = projector(o)
+    R, h0, h1 = 4.6, 11, 14.6
+    r = 2.1
+    hexv = [(R * math.cos(math.radians(15 + 60 * i)), R * math.sin(math.radians(15 + 60 * i))) for i in range(6)]
+    els = [cylinder(o, 0, 0, 0, h0, r, TOP, MID)]
+    for i in range(4):  # thread crests: the front half of a slightly tilted ring
+        z = 1.6 + 2.2 * i
+        front = [P(r * math.cos(math.radians(a)), r * math.sin(math.radians(a)),
+                   z + 0.5 * math.sin(math.radians(a - 45))) for a in range(-45, 136, 10)]
+        els.append(polyline(front, THIN))
+    for i in range(6):
+        (x0, y0), (x1, y1) = hexv[i], hexv[(i + 1) % 6]
+        nx, ny = (x0 + x1) / 2, (y0 + y1) / 2
+        if nx + ny <= 0.01:
+            continue  # faces the back
+        fill = MID if nx > ny + 0.01 else SHADE if ny > nx + 0.01 else SOFT
+        els.append(poly([P(x0, y0, h1), P(x1, y1, h1), P(x1, y1, h0), P(x0, y0, h0)], fill))
+    els.append(poly([P(x, y, h1) for x, y in hexv], TOP))
+    return els
+
+
 # ---------------------------------------------------------------------------------------------
 # Document types: an emblem on a square platform.
 
@@ -471,6 +497,20 @@ DOC_O = (12, 10.2)
 def assembly():
     o = DOC_O
     return [platform(o), *tint_box(o, 1, 5.6, 4.4, 9, PZ, PZ + 4.6), *tint_cyl(o, 6.6, 3.4, PZ, PZ + 7, 2.3)]
+
+
+@icon("assembly-rigid", "solid", "Rigid subassembly")
+def assembly_rigid():
+    # The assembly emblem, smaller, between square brackets: a subassembly that moves as one body.
+    k = 0.78
+    o = (12, 10.2)
+    z = PZ * k
+    brk = 'stroke-width="1.4"'
+    return [box(o, 0, 10 * k, 0, 10 * k, 0, z, SOFT, MID, SHADE),
+            *tint_box(o, 1 * k, 5.6 * k, 4.4 * k, 9 * k, z, z + 4.6 * k),
+            *tint_cyl(o, 6.6 * k, 3.4 * k, z, z + 7 * k, 2.3 * k),
+            polyline([(5, 3.5), (2.6, 3.5), (2.6, 20.5), (5, 20.5)], brk),
+            polyline([(19, 3.5), (21.4, 3.5), (21.4, 20.5), (19, 20.5)], brk)]
 
 
 @icon("part-studio", "solid", "Part Studio")
