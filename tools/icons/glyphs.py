@@ -197,3 +197,19 @@ def origin():
     # A ring on crossed axis ticks, the origin point filled.
     return [circle(12, 12, 6), dot(12, 12, 2.6, ACCENT),
             line(12, 2, 12, 5), line(12, 19, 12, 22), line(2, 12, 5, 12), line(19, 12, 22, 12)]
+
+
+@icon("instance-dof", "glyph", "Under-constrained instance")
+def instance_dof():
+    # A small three-axis triad: the degrees of freedom an instance still has. The origin is
+    # filled; X runs right, Y up and Z out toward the viewer (down and to the left).
+    o = (10, 14)
+    return [arrow(*o, 21, 14, 4.2, 4.2), arrow(*o, 10, 3, 4.2, 4.2), arrow(*o, 3.6, 20.4, 4.2, 4.2),
+            dot(*o, BIG, ACCENT)]
+
+
+@icon("mate-limits", "glyph", "Mate limits")
+def mate_limits():
+    # A range with stops: two short bars and a double arrow between them.
+    return [line(6.5, 3, 17.5, 3), line(6.5, 21, 17.5, 21),
+            arrow(12, 12, 12, 6.8, 3.6, 5, ACCENT), arrow(12, 12, 12, 17.2, 3.6, 5, ACCENT)]

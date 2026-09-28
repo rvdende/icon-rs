@@ -395,6 +395,12 @@ def pause():
     return [rect(6.5, 5, 3.5, 14, 1.25), rect(14, 5, 3.5, 14, 1.25)]
 
 
+@icon("stop", "line", "Stop")
+def stop():
+    # A filled square, as a media player's stop button (the same height as Pause).
+    return [rect(6, 6, 12, 12, 1.5, INK)]
+
+
 @icon("visible", "line", "Visible")
 def visible():
     return [path(_d(_eye_pts())), _acc(circle(12, 12, 3))]
