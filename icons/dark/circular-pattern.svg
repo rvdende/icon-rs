@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e4e4e7" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
+  <polyline points="17.72,16.9 17.2,17.18 16.64,17.42 16.04,17.64 15.42,17.83 14.76,17.99 14.09,18.11 13.4,18.2 12.7,18.25 12,18.27 11.3,18.25 10.6,18.2 9.91,18.11 9.24,17.99 8.58,17.83 7.96,17.64 7.36,17.42 6.8,17.18 6.28,16.9 5.81,16.6 5.38,16.28 5,15.93 4.67,15.57 4.4,15.2 4.19,14.81 4.04,14.41 3.95,14.01 3.92,13.6 3.95,13.19 4.04,12.79 4.19,12.39 4.4,12 4.67,11.63 5,11.27 5.38,10.92 5.81,10.6 6.28,10.3 6.8,10.02 7.36,9.78 7.96,9.56 8.58,9.37 9.24,9.21 9.91,9.09 10.6,9 11.3,8.95 12,8.93 12.7,8.95 13.4,9 14.09,9.09 14.76,9.21 15.42,9.37 16.04,9.56 16.64,9.78 17.2,10.02 17.72,10.3 18.19,10.6 18.62,10.92 19,11.27 19.33,11.63 19.6,12 19.81,12.39 19.96,12.79 20.05,13.19 20.08,13.6 20.05,14.01 19.96,14.41 19.81,14.81 19.6,15.2 19.33,15.57 19,15.93 18.62,16.28 18.19,16.6 17.72,16.9" stroke-width="0.8" stroke-dasharray="1.4 2.4"/>
+  <line x1="12" y1="15.1" x2="12" y2="7.6" stroke-width="0.9" stroke-dasharray="2.3 2.5 0.01 2.5"/>
+  <polygon points="12,4.58 14.51,6.03 12,7.48 9.49,6.03" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="14.51,6.03 12,7.48 12,10.38 14.51,8.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="9.49,6.03 12,7.48 12,10.38 9.49,8.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="19,6.92 21.51,8.37 19,9.82 16.49,8.37" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="21.51,8.37 19,9.82 19,12.72 21.51,11.27" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="16.49,8.37 19,9.82 19,12.72 16.49,11.27" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="5,6.92 7.51,8.37 5,9.82 2.49,8.37" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="7.51,8.37 5,9.82 5,12.72 7.51,11.27" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="2.49,8.37 5,9.82 5,12.72 2.49,11.27" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="5,11.58 7.51,13.03 5,14.48 2.49,13.03" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="7.51,13.03 5,14.48 5,17.38 7.51,15.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="2.49,13.03 5,14.48 5,17.38 2.49,15.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="19,11.58 21.51,13.03 19,14.48 16.49,13.03" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="21.51,13.03 19,14.48 19,17.38 21.51,15.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="16.49,13.03 19,14.48 19,17.38 16.49,15.93" fill="#60a5fa" stroke="#60a5fa" stroke-width="1" fill-opacity="0.22"/>
+  <polygon points="12,13.92 14.51,15.37 12,16.82 9.49,15.37" fill="#a1a1aa"/>
+  <polygon points="14.51,15.37 12,16.82 12,19.72 14.51,18.27" fill="#71717a"/>
+  <polygon points="9.49,15.37 12,16.82 12,19.72 9.49,18.27" fill="#52525b"/>
+</svg>

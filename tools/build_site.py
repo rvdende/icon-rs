@@ -25,10 +25,14 @@ def palette(name):
 
 tints = re.search(r"\{ \((\d+), (\d+), (\d+)\) \} else \{ \((\d+), (\d+), (\d+)\) \}", lib).groups()
 tints = {"dark": list(map(int, tints[:3])), "light": list(map(int, tints[3:]))}
+generated = open(os.path.join(ROOT, "src", "generated.rs")).read()
 icons = [
-    {"konst": k, "name": n, "svg": open(os.path.join(ROOT, "icons", f"{n}.svg")).read()}
-    for k, n in re.findall(r'(\w+)\s*=>\s*"([\w-]+)"', lib)
+    {"konst": k, "name": n, "kind": kind, "title": t.replace('\\"', '"'),
+     "svg": open(os.path.join(ROOT, "icons", f"{n}.svg")).read()}
+    for k, n, kind, t in re.findall(r'(\w+) => \("([\w-]+)", (\w+), "((?:[^"\\]|\\.)*)"\)', generated)
 ]
+KIND_TITLES = [("Solid", "Features and assembly"), ("Sketch", "Sketch"),
+               ("Glyph", "Constraints and markers"), ("Line", "Interface")]
 
 shutil.rmtree(OUT, ignore_errors=True)
 os.makedirs(os.path.join(OUT, "icons", "dark"))
@@ -37,11 +41,21 @@ for icon in icons:
         shutil.copy(os.path.join(ROOT, "icons", sub, f"{icon['name']}.svg"), os.path.join(OUT, "icons", sub))
 open(os.path.join(OUT, ".nojekyll"), "w").close()
 
-tiles = "\n".join(
-    f'      <button class="tile" data-name="{html.escape(i["name"])}">'
-    f'<img alt="" width="85" height="85"><span>{html.escape(i["name"])}</span></button>'
-    for i in icons
-)
+def tile(i):
+    return (f'      <button class="tile" data-name="{html.escape(i["name"])}" '
+            f'data-search="{html.escape((i["name"] + " " + i["title"]).lower())}" title="{html.escape(i["title"])}">'
+            f'<img alt="" width="85" height="85"><span>{html.escape(i["name"])}</span></button>')
+
+
+groups = []
+for kind, heading in KIND_TITLES:
+    members = [i for i in icons if i["kind"] == kind]
+    if members:
+        groups.append(f'    <div class="group" data-kind="{kind}">\n'
+                      f'    <h2>{heading} <small>{len(members)}</small></h2>\n'
+                      f'    <section class="grid" aria-label="{heading}">\n'
+                      + "\n".join(tile(i) for i in members) + "\n    </section>\n    </div>")
+tiles = "\n".join(groups)
 
 page = r"""<!doctype html>
 <html lang="en">
@@ -133,13 +147,23 @@ page = r"""<!doctype html>
   .chip:hover { border-color: var(--accent); }
   .chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
   .chip i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid; display: inline-block; }
-  .swatches { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+  .swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
   .swatch { font-size: 11px; color: var(--muted); }
   .swatch b {
     display: block; height: 28px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 4px;
   }
   .swatch code { display: block; font: 11px "JetBrains Mono", ui-monospace, monospace; color: var(--text); }
 
+  .group { margin-bottom: 28px; }
+  .group h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+  .group h2 small { color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .finder { margin-bottom: 20px; }
+  .finder input {
+    width: 100%; max-width: 360px; height: 38px; padding: 0 12px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit;
+  }
+  .finder input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .empty { color: var(--muted); }
   .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 900px) { .grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
   @media (max-width: 640px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; } }
@@ -154,6 +178,7 @@ page = r"""<!doctype html>
   .tile:focus-visible, .chip:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .tile:active { transform: scale(0.98); }
   .tile img { width: clamp(44px, 8.2vw, 85px); height: auto; aspect-ratio: 1; }
+  .tile[hidden], .group[hidden] { display: none; }
   .tile span { overflow-wrap: anywhere; text-align: center; }
 
   dialog {
@@ -199,7 +224,7 @@ page = r"""<!doctype html>
     <header>
       <div class="intro">
         <h1>icon-rs<small>v__VERSION__</small></h1>
-        <p>SVG icons for CAD feature tools, embedded as Rust constants. Click an icon to see how to use it.</p>
+        <p>SVG icons for CAD apps, embedded as Rust constants: shaded isometric features and mates, sketch tools, constraint glyphs and a matching interface set. Click an icon to see how to use it.</p>
         <div class="links">
           <code class="install">cargo add __CRATE__</code>
           <a href="https://crates.io/crates/__CRATE__">crates.io</a>
@@ -216,7 +241,7 @@ page = r"""<!doctype html>
     <section class="palette" aria-label="Palette playground">
       <div>
         <h2>Palette</h2>
-        <p class="hint">Pick a line colour and a spot colour; the face shades are derived from the spot, the same way <code>Palette::from_spot</code> does it.</p>
+        <p class="hint">Pick a line and a spot colour; the face shades are derived from the spot, the same way <code>Palette::from_spot</code> does it. The accent marks what each tool acts on.</p>
         <div class="pickers">
           <div class="picker">
             <label for="ink-hex">Line</label>
@@ -228,6 +253,11 @@ page = r"""<!doctype html>
             <input type="color" id="spot-color" aria-label="Spot colour">
             <input type="text" id="spot-hex" pattern="#?[0-9a-fA-F]{6}" spellcheck="false">
           </div>
+          <div class="picker">
+            <label for="accent-hex">Accent</label>
+            <input type="color" id="accent-color" aria-label="Accent colour">
+            <input type="text" id="accent-hex" pattern="#?[0-9a-fA-F]{6}" spellcheck="false">
+          </div>
         </div>
         <div class="presets" id="presets"></div>
       </div>
@@ -238,9 +268,11 @@ page = r"""<!doctype html>
       </div>
     </section>
 
-    <section class="grid" aria-label="Icons">
+    <div class="finder">
+      <input type="search" id="find" placeholder="Filter __COUNT__ icons" aria-label="Filter icons" spellcheck="false">
+    </div>
 __TILES__
-    </section>
+    <p class="empty" id="empty" hidden>No icons match.</p>
     <footer>__COUNT__ icons · MIT or Apache-2.0</footer>
   </main>
 
@@ -267,7 +299,7 @@ const ICONS = __ICONS__;
 const PALETTES = __PALETTES__;
 const TINTS = __TINTS__;
 const CRATE = "__CRATE__", VERSION = "__DEP_VERSION__";
-const SLOTS = ["ink", "top", "soft", "mid", "shade"];
+const SLOTS = ["ink", "top", "soft", "mid", "shade", "accent"];
 const PRESETS = [
   { name: "Default" },
   { name: "Slate", ink: "#0f172a", spot: "#94a3b8" },
@@ -295,7 +327,8 @@ const mix = (a, b, pct) => toHex(rgb(a).map((v, i) => Math.floor((v * (100 - pct
 const luma = hex => { const [r, g, b] = rgb(hex); return Math.floor((r * 299 + g * 587 + b * 114) / 1000); };
 function fromSpot(ink, spot) {
   const [top, soft, shade] = luma(ink) > luma(spot) ? TINTS.dark : TINTS.light;
-  return { ink, top: mix(spot, "#ffffff", top), soft: mix(spot, "#ffffff", soft), mid: spot, shade: mix(spot, "#000000", shade) };
+  const accent = luma(ink) > luma(spot) ? PALETTES.dark.accent : PALETTES.light.accent;
+  return { ink, top: mix(spot, "#ffffff", top), soft: mix(spot, "#ffffff", soft), mid: spot, shade: mix(spot, "#000000", shade), accent };
 }
 
 // Port of Icon::recolor: every light-palette colour maps to its slot in one pass.
@@ -309,14 +342,20 @@ const state = {
   theme: document.documentElement.dataset.theme,
   custom: (() => { try { return JSON.parse(store.get("palette")); } catch { return null; } })(),
 };
-const current = () => state.custom ? fromSpot(state.custom.ink, state.custom.spot) : PALETTES[state.theme];
+function current() {
+  if (!state.custom) return PALETTES[state.theme];
+  const p = fromSpot(state.custom.ink, state.custom.spot);
+  if (state.custom.accent) p.accent = state.custom.accent;
+  return p;
+}
 const rgbLit = hex => `Rgb(${rgb(hex).map(v => "0x" + v.toString(16).padStart(2, "0")).join(", ")})`;
 
 function paletteExpr() {
   if (state.custom) return `Palette::from_spot(
     ${rgbLit(state.custom.ink)},  // line
     ${rgbLit(state.custom.spot)}, // spot
-)`;
+)` + (state.custom.accent ? `
+.with_accent(${rgbLit(state.custom.accent)})` : "");
   return state.theme === "dark" ? "Palette::DARK" : "Palette::LIGHT";
 }
 
@@ -326,7 +365,7 @@ function render() {
 
   const ink = state.custom ? state.custom.ink : palette.ink;
   const spot = state.custom ? state.custom.spot : palette.mid;
-  for (const [key, value] of [["ink", ink], ["spot", spot]]) {
+  for (const [key, value] of [["ink", ink], ["spot", spot], ["accent", palette.accent]]) {
     $(`${key}-color`).value = value;
     if (document.activeElement !== $(`${key}-hex`)) $(`${key}-hex`).value = value;
   }
@@ -355,8 +394,8 @@ function setCode(id, src) {
   }).join("\n");
 }
 
-function setCustom(ink, spot) {
-  state.custom = ink && spot ? { ink, spot } : null;
+function setCustom(ink, spot, accent) {
+  state.custom = ink && spot ? (accent ? { ink, spot, accent } : { ink, spot }) : null;
   store.set("palette", state.custom ? JSON.stringify(state.custom) : null);
   render();
 }
@@ -380,12 +419,16 @@ function currentPair() {
   const p = current();
   return state.custom ? { ...state.custom } : { ink: p.ink, spot: p.mid };
 }
-for (const key of ["ink", "spot"]) {
-  $(`${key}-color`).addEventListener("input", e => { const pair = currentPair(); pair[key] = e.target.value; setCustom(pair.ink, pair.spot); });
+function pick(key, hex) {
+  const pair = currentPair();
+  pair[key] = hex;
+  setCustom(pair.ink, pair.spot, pair.accent);
+}
+for (const key of ["ink", "spot", "accent"]) {
+  $(`${key}-color`).addEventListener("input", e => pick(key, e.target.value));
   $(`${key}-hex`).addEventListener("input", e => {
     const hex = parse(e.target.value);
-    if (!hex) return;
-    const pair = currentPair(); pair[key] = hex; setCustom(pair.ink, pair.spot);
+    if (hex) pick(key, hex);
   });
   $(`${key}-hex`).addEventListener("blur", render);
 }
@@ -401,6 +444,13 @@ document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () =
 // Icon sheet
 const sheet = $("sheet");
 function rustSnippet(i) {
+  if (i.kind === "Glyph" || i.kind === "Line") return `// Cargo.toml: ${CRATE} = "${VERSION}"
+use icon_rs::{Rgb, ${i.konst}};
+
+// Ink plus a little accent: theme variants, or paint the ink any colour.
+let svg: &str = ${i.konst}.themed(is_dark);
+let tinted: String = ${i.konst}.tinted(${rgbLit(current().ink)});
+let both: String = ${i.konst}.tinted_with(${rgbLit(current().ink)}, ${rgbLit(current().accent)});`;
   if (state.custom) return `// Cargo.toml: ${CRATE} = "${VERSION}"
 use icon_rs::{Palette, Rgb, ${i.konst}};
 
@@ -419,7 +469,9 @@ let svg = icon_rs::get("${i.name}").unwrap().themed(is_dark);`;
 }
 
 function resvgSnippet(i) {
-  const src = state.custom ? `&${i.konst}.recolor(&palette)` : `icon_rs::${i.konst}.svg`;
+  const mono = i.kind === "Glyph" || i.kind === "Line";
+  const src = mono ? `&icon_rs::${i.konst}.tinted(${rgbLit(current().ink)})`
+    : state.custom ? `&${i.konst}.recolor(&palette)` : `icon_rs::${i.konst}.svg`;
   return `// Cargo.toml: resvg = "0.48"
 use resvg::{tiny_skia, usvg};
 
@@ -462,6 +514,22 @@ document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", asyn
   setTimeout(() => (b.textContent = "Copy"), 1400);
 }));
 window.addEventListener("hashchange", () => location.hash ? open(decodeURIComponent(location.hash.slice(1))) : close());
+
+$("find").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  let any = false;
+  document.querySelectorAll(".group").forEach(g => {
+    let shown = 0;
+    g.querySelectorAll(".tile").forEach(t => {
+      const hit = !q || t.dataset.search.includes(q);
+      t.hidden = !hit;
+      shown += hit;
+    });
+    g.hidden = !shown;
+    any ||= shown > 0;
+  });
+  $("empty").hidden = any;
+});
 
 render();
 if (location.hash) open(decodeURIComponent(location.hash.slice(1)));

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#262626" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
+  <polygon points="11.2,9.5 18.13,13.5 11.2,17.5 4.27,13.5" fill="#d4d4d4"/>
+  <polygon points="18.13,13.5 11.2,17.5 11.2,19.5 18.13,15.5" fill="#a3a3a3"/>
+  <polygon points="4.27,13.5 11.2,17.5 11.2,19.5 4.27,15.5" fill="#737373"/>
+  <path d="M9.85 4 L9.85 13.5 A1.35 0.78 0 0 0 12.55 13.5 L12.55 4 Z" fill="#a3a3a3"/>
+  <ellipse cx="11.2" cy="4" rx="1.35" ry="0.78" fill="#ffffff"/>
+  <path d="M8.02 8 L8.02 10.5 A3.18 1.84 0 0 0 14.38 10.5 L14.38 8 Z" fill="#a3a3a3"/>
+  <ellipse cx="11.2" cy="8" rx="3.18" ry="1.84" fill="#ffffff"/>
+  <polyline points="6.38,9.61 6.32,9.85 6.3,10.1 6.32,10.35 6.38,10.59 6.47,10.83 6.6,11.07 6.76,11.3 6.96,11.51 7.19,11.72 7.45,11.92 7.74,12.1 8.05,12.27 8.39,12.42 8.75,12.55 9.13,12.66 9.52,12.76 9.93,12.83 10.35,12.89 10.77,12.92 11.2,12.93 11.63,12.92" stroke="#2563eb"/>
+  <polygon points="13.65,12.55 11.13,14.33 10.66,11.77" fill="#2563eb" stroke="#2563eb"/>
+  <line x1="17" y1="9.3" x2="17" y2="12.22" stroke="#2563eb"/>
+  <polygon points="17,14.3 15.8,11.7 18.2,11.7" fill="#2563eb" stroke="#2563eb"/>
+  <line x1="17" y1="9.3" x2="17" y2="6.38" stroke="#2563eb"/>
+  <polygon points="17,4.3 18.2,6.9 15.8,6.9" fill="#2563eb" stroke="#2563eb"/>
+</svg>

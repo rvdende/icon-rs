@@ -1,8 +1,8 @@
 [package]
 name = "icon-rs"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
-description = "SVG icon set for CAD feature tools"
+description = "SVG icons for CAD apps: isometric features and mates, sketch tools, constraint glyphs and UI icons"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rvdende/icon-rs"
 homepage = "https://rvdende.github.io/icon-rs/"

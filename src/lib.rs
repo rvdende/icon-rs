@@ -1,13 +1,39 @@
-//! SVG icons for CAD feature tools, embedded at compile time.
+//! SVG icons for CAD apps, embedded at compile time.
 //!
-//! Every icon uses a 24x24 view box, an outline and four face shades so faces read as solid
-//! geometry at toolbar size. Each icon ships a light-theme and a dark-theme SVG; for any other
-//! theme, [`Icon::recolor`] swaps in your own [`Palette`].
+//! Every icon uses a 24x24 view box and is one of four [`Kind`]s: shaded isometric solids for
+//! features, flat sketch tools, and ink-drawn glyphs and UI icons that an app can tint. Each
+//! icon ships a light-theme and a dark-theme SVG; for any other theme, [`Icon::recolor`] swaps in
+//! your own [`Palette`], and [`Icon::tinted`] paints a glyph or UI icon in any colour.
 
-/// One icon: its file stem and its SVG source for light and dark backgrounds.
+/// What an icon depicts, which decides how it is drawn and whether it can be tinted.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Kind {
+    /// Isometric CAD geometry with shaded faces: features, mates, analysis tools.
+    Solid,
+    /// Flat sketch geometry, with the points the user picks in the accent colour.
+    Sketch,
+    /// Small markers such as sketch constraints, legible at 10-16 px.
+    Glyph,
+    /// Interface icons such as undo, folder and search.
+    Line,
+}
+
+impl Kind {
+    /// Glyph and line icons are drawn in ink with at most a small accent detail, so they can be
+    /// tinted freely with [`Icon::tinted`].
+    pub fn is_tintable(self) -> bool {
+        matches!(self, Kind::Glyph | Kind::Line)
+    }
+}
+
+/// One icon: its name, kind, title and SVG source for light and dark backgrounds.
 #[derive(Clone, Copy, Debug)]
 pub struct Icon {
+    /// Kebab-case file stem, such as `"linear-pattern"`.
     pub name: &'static str,
+    pub kind: Kind,
+    /// Human-readable name, such as `"Linear pattern"`.
+    pub title: &'static str,
     /// For light backgrounds: dark outline, white to mid-grey faces.
     pub svg: &'static str,
     /// For dark backgrounds: light outline, darker faces, same lighting direction.
@@ -33,6 +59,23 @@ impl Icon {
             svg = svg.replace(&placeholder(slot), &to.to_hex());
         }
         svg
+    }
+
+    /// The light SVG with its ink painted `color`; any accent detail keeps the light accent.
+    /// Meant for [`Kind::is_tintable`] icons; for other kinds only the outlines change.
+    pub fn tinted(&self, color: impl Into<Rgb>) -> String {
+        self.tinted_with(color, Palette::LIGHT.accent)
+    }
+
+    /// The light SVG with its ink painted `color` and its accent detail painted `accent`.
+    pub fn tinted_with(&self, color: impl Into<Rgb>, accent: impl Into<Rgb>) -> String {
+        self.recolor(&Palette { ink: color.into(), accent: accent.into(), ..Palette::LIGHT })
+    }
+
+    /// Whether the icon has any accent-coloured detail. Apps that tint by multiplying a
+    /// single-colour raster need a second layer (or a pre-coloured raster) for these.
+    pub fn has_accent(&self) -> bool {
+        self.svg.contains(&Palette::LIGHT.accent.to_hex())
     }
 }
 
@@ -85,6 +128,8 @@ pub struct Palette {
     pub mid: Rgb,
     /// Left-hand side faces, in shadow.
     pub shade: Rgb,
+    /// What the tool acts on: the edge being filleted, a sketch tool's input points.
+    pub accent: Rgb,
 }
 
 impl Palette {
@@ -95,6 +140,7 @@ impl Palette {
         soft: Rgb(0xd4, 0xd4, 0xd4),
         mid: Rgb(0xa3, 0xa3, 0xa3),
         shade: Rgb(0x73, 0x73, 0x73),
+        accent: Rgb(0x25, 0x63, 0xeb),
     };
 
     /// The colours `Icon::svg_dark` is drawn with.
@@ -104,29 +150,38 @@ impl Palette {
         soft: Rgb(0x8b, 0x8b, 0x94),
         mid: Rgb(0x71, 0x71, 0x7a),
         shade: Rgb(0x52, 0x52, 0x5b),
+        accent: Rgb(0x60, 0xa5, 0xfa),
     };
 
     /// Builds a palette from a line colour and one spot colour. The spot fills side faces; the
     /// top and bevel faces are tinted towards white and the shaded faces towards black. When the
     /// line is lighter than the spot (a dark theme) the tints are gentler, so top faces don't
-    /// glare against a dark background.
+    /// glare against a dark background. The accent comes from [`Palette::LIGHT`] or
+    /// [`Palette::DARK`] by the same test; change it with [`Palette::with_accent`].
     ///
     /// Takes anything that converts to [`Rgb`]; with the `bevy_color` feature that includes
     /// `bevy_color::Color` and `Srgba`.
     pub fn from_spot(ink: impl Into<Rgb>, spot: impl Into<Rgb>) -> Palette {
         let (ink, spot) = (ink.into(), spot.into());
-        let (top, soft, shade) = if ink.luma() > spot.luma() { (35, 18, 28) } else { (85, 45, 30) };
+        let dark = ink.luma() > spot.luma();
+        let (top, soft, shade) = if dark { (35, 18, 28) } else { (85, 45, 30) };
         Palette {
             ink,
             top: spot.mix(Rgb::WHITE, top),
             soft: spot.mix(Rgb::WHITE, soft),
             mid: spot,
             shade: spot.mix(Rgb::BLACK, shade),
+            accent: if dark { Palette::DARK.accent } else { Palette::LIGHT.accent },
         }
     }
 
-    fn slots(&self) -> [Rgb; 5] {
-        [self.ink, self.top, self.soft, self.mid, self.shade]
+    /// This palette with a different accent colour.
+    pub fn with_accent(self, accent: impl Into<Rgb>) -> Palette {
+        Palette { accent: accent.into(), ..self }
+    }
+
+    fn slots(&self) -> [Rgb; 6] {
+        [self.ink, self.top, self.soft, self.mid, self.shade, self.accent]
     }
 }
 
@@ -187,31 +242,24 @@ mod bevy_color_impls {
 }
 
 macro_rules! icons {
-    ($($konst:ident => $file:literal),* $(,)?) => {
-        $(pub const $konst: Icon = Icon {
-            name: $file,
-            svg: include_str!(concat!("../icons/", $file, ".svg")),
-            svg_dark: include_str!(concat!("../icons/dark/", $file, ".svg")),
-        };)*
+    ($($konst:ident => ($file:literal, $kind:ident, $title:literal)),* $(,)?) => {
+        $(
+            #[doc = concat!("![", $title, "](https://rvdende.github.io/icon-rs/icons/", $file, ".svg) ", $title)]
+            pub const $konst: Icon = Icon {
+                name: $file,
+                kind: Kind::$kind,
+                title: $title,
+                svg: include_str!(concat!("../icons/", $file, ".svg")),
+                svg_dark: include_str!(concat!("../icons/dark/", $file, ".svg")),
+            };
+        )*
 
-        /// Every icon, in toolbar order.
+        /// Every icon, grouped by kind in toolbar order.
         pub const ALL: &[Icon] = &[$($konst),*];
     };
 }
 
-icons! {
-    EXTRUDE => "extrude",
-    REVOLVE => "revolve",
-    SWEEP => "sweep",
-    LOFT => "loft",
-    THICKEN => "thicken",
-    ENCLOSE => "enclose",
-    FILLET => "fillet",
-    CHAMFER => "chamfer",
-    SHELL => "shell",
-    PATTERN => "pattern",
-    BOOLEAN => "boolean",
-}
+include!("generated.rs");
 
 /// Looks an icon up by its file stem, such as `"extrude"`.
 pub fn get(name: &str) -> Option<Icon> {
@@ -272,6 +320,24 @@ mod tests {
         let svg = SHELL.recolor(&palette);
         assert!(svg.contains(r##"stroke="#ffffff""##));
         assert!(svg.contains(r##"fill="#010203""##));
+    }
+
+    #[test]
+    fn tintable_icons_use_only_ink_and_accent() {
+        let accent = Palette::LIGHT.accent.to_hex();
+        for icon in ALL.iter().filter(|i| i.kind.is_tintable()) {
+            let white = icon.tinted(Rgb::WHITE);
+            let colours = white.matches("=\"#").count();
+            let allowed = white.matches("=\"#ffffff").count() + white.matches(&format!("=\"{accent}")).count();
+            assert_eq!(colours, allowed, "{} uses a colour other than ink and accent", icon.name);
+        }
+    }
+
+    #[test]
+    fn tinting_keeps_the_accent() {
+        let icon = ALL.iter().find(|i| i.has_accent()).expect("an accented icon");
+        let svg = icon.tinted_with(Rgb::WHITE, Rgb(1, 2, 3));
+        assert!(svg.contains("#010203") && !svg.contains(&Palette::LIGHT.accent.to_hex()));
     }
 
     #[test]

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#262626" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
+  <polygon points="12,8.4 20.66,13.4 12,18.4 3.34,13.4" fill="#d4d4d4"/>
+  <polygon points="20.66,13.4 12,18.4 12,20.2 20.66,15.2" fill="#a3a3a3"/>
+  <polygon points="3.34,13.4 12,18.4 12,20.2 3.34,15.2" fill="#737373"/>
+  <line x1="14.42" y1="12" x2="17.37" y2="13.7" stroke="#2563eb" stroke-width="1.2"/>
+  <circle cx="17.37" cy="13.7" r="0.8" fill="#2563eb" stroke="none"/>
+  <line x1="12.87" y1="12.9" x2="15.81" y2="14.6" stroke="#2563eb" stroke-width="1.2"/>
+  <circle cx="15.81" cy="14.6" r="0.8" fill="#2563eb" stroke="none"/>
+  <line x1="11.31" y1="13.8" x2="14.25" y2="15.5" stroke="#2563eb" stroke-width="1.2"/>
+  <circle cx="14.25" cy="15.5" r="0.8" fill="#2563eb" stroke="none"/>
+  <polygon points="12,8.2 15.64,10.3 10.79,13.1 7.15,11" fill="#ffffff"/>
+  <polygon points="15.64,10.3 10.79,13.1 10.79,14.5 15.64,11.7" fill="#a3a3a3"/>
+  <polygon points="7.15,11 10.79,13.1 10.79,14.5 7.15,12.4" fill="#737373"/>
+</svg>
