@@ -110,7 +110,11 @@ impl Palette {
     /// top and bevel faces are tinted towards white and the shaded faces towards black. When the
     /// line is lighter than the spot (a dark theme) the tints are gentler, so top faces don't
     /// glare against a dark background.
-    pub fn from_spot(ink: Rgb, spot: Rgb) -> Palette {
+    ///
+    /// Takes anything that converts to [`Rgb`]; with the `bevy_color` feature that includes
+    /// `bevy_color::Color` and `Srgba`.
+    pub fn from_spot(ink: impl Into<Rgb>, spot: impl Into<Rgb>) -> Palette {
+        let (ink, spot) = (ink.into(), spot.into());
         let (top, soft, shade) = if ink.luma() > spot.luma() { (35, 18, 28) } else { (85, 45, 30) };
         Palette {
             ink,
@@ -123,6 +127,62 @@ impl Palette {
 
     fn slots(&self) -> [Rgb; 5] {
         [self.ink, self.top, self.soft, self.mid, self.shade]
+    }
+}
+
+#[cfg(feature = "bevy_color")]
+mod bevy_color_impls {
+    //! Alpha is dropped going to `Rgb` and set to opaque coming back; icons have no transparency.
+
+    use super::Rgb;
+    use bevy_color::{Color, ColorToPacked, Srgba};
+
+    impl From<Rgb> for Srgba {
+        fn from(c: Rgb) -> Srgba {
+            Srgba::rgb_u8(c.0, c.1, c.2)
+        }
+    }
+
+    impl From<Rgb> for Color {
+        fn from(c: Rgb) -> Color {
+            Color::Srgba(c.into())
+        }
+    }
+
+    impl From<Srgba> for Rgb {
+        fn from(c: Srgba) -> Rgb {
+            let [r, g, b] = c.to_u8_array_no_alpha();
+            Rgb(r, g, b)
+        }
+    }
+
+    impl From<Color> for Rgb {
+        fn from(c: Color) -> Rgb {
+            c.to_srgba().into()
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use crate::Palette;
+        use bevy_color::palettes::tailwind;
+
+        #[test]
+        fn round_trips_through_bevy_color() {
+            let sky = Rgb(0x38, 0xbd, 0xf8);
+            assert_eq!(Rgb::from(Color::from(sky)), sky);
+            assert_eq!(Rgb::from(Srgba::from(sky)), sky);
+            // Linear colours convert back to sRGB first.
+            assert_eq!(Rgb::from(Color::LinearRgba(Color::from(sky).to_linear())), sky);
+        }
+
+        #[test]
+        fn from_spot_accepts_bevy_colors() {
+            let from_bevy = Palette::from_spot(tailwind::SKY_900, Color::from(tailwind::SKY_400));
+            let from_rgb = Palette::from_spot(Rgb::from(tailwind::SKY_900), Rgb::from(tailwind::SKY_400));
+            assert_eq!(from_bevy, from_rgb);
+        }
     }
 }
 

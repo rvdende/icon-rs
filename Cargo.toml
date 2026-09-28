@@ -1,6 +1,6 @@
 [package]
 name = "icon-rs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "SVG icon set for CAD feature tools"
 license = "MIT OR Apache-2.0"
@@ -15,5 +15,15 @@ exclude = ["/.github", "/site", "/tools/build_site.py"]
 [lib]
 name = "icon_rs"
 
+[features]
+# Conversions between Rgb and bevy_color's Color and Srgba.
+bevy_color = ["dep:bevy_color"]
+
+[dependencies]
+bevy_color = { version = "0.19", optional = true, default-features = false, features = ["std"] }
+
 [dev-dependencies]
 resvg = "0.48"
+
+[package.metadata.docs.rs]
+all-features = true
