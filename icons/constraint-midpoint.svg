@@ -2,5 +2,5 @@
   <line x1="3" y1="12" x2="21" y2="12"/>
   <line x1="3" y1="7.5" x2="3" y2="16.5"/>
   <line x1="21" y1="7.5" x2="21" y2="16.5"/>
-  <circle cx="12" cy="12" r="3.3" fill="#262626" stroke="none"/>
+  <circle cx="12" cy="12" r="3.3" fill="#2563eb" stroke="none"/>
 </svg>
