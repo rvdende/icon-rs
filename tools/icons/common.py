@@ -33,22 +33,23 @@ colours per state.
 """
 import math
 
-# Palette slots, light theme. src/lib.rs's Palette::LIGHT must match (gen.py checks).
+# Palette slots, light theme. src/lib.rs's Palette::LIGHT must match (gen.py checks). The four
+# face greys are neutral tints of INK: faces are context, the accent is what the tool acts on.
 INK = "#262626"
 TOP = "#ffffff"
 SOFT = "#d4d4d4"
-MID = "#a3a3a3"
-SHADE = "#737373"
+MID = "#a4a4a4"
+SHADE = "#747474"
 ACCENT = "#2563eb"
 # Old names, kept for part.py.
 LIGHT, DARK = TOP, SHADE
 
 DARK_PALETTE = {
     INK: "#e4e4e7",
-    TOP: "#a1a1aa",
-    SOFT: "#8b8b94",
-    MID: "#71717a",
-    SHADE: "#52525b",
+    TOP: "#a0a0a2",
+    SOFT: "#89898b",
+    MID: "#707071",
+    SHADE: "#525253",
     ACCENT: "#60a5fa",
 }
 

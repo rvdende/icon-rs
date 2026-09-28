@@ -1,26 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#262626" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
-  <polygon points="12,4.6 18.41,8.3 12,12 5.59,8.3" fill="#2563eb" stroke="none" fill-opacity="0.25"/>
-  <polygon points="18.41,8.3 12,12 12,19.4 18.41,15.7" fill="#2563eb" stroke="none" fill-opacity="0.25"/>
-  <polygon points="5.59,8.3 12,12 12,19.4 5.59,15.7" fill="#2563eb" stroke="none" fill-opacity="0.25"/>
-  <polygon points="5.59,8.3 12,12 12,19.4 5.59,15.7" fill="#2563eb" stroke="none" fill-opacity="0.35"/>
-  <polygon points="18.41,8.3 12,12 12,19.4 18.41,15.7" fill="#2563eb" stroke="none" fill-opacity="0.1"/>
-  <line x1="12" y1="4.6" x2="10.18" y2="3.55" stroke-width="0.8"/>
-  <line x1="12" y1="4.6" x2="13.82" y2="3.55" stroke-width="0.8"/>
-  <line x1="18.41" y1="8.3" x2="20.23" y2="9.35" stroke-width="0.8"/>
-  <line x1="18.41" y1="8.3" x2="20.23" y2="7.25" stroke-width="0.8"/>
-  <line x1="18.41" y1="15.7" x2="18.41" y2="17.8" stroke-width="0.8"/>
-  <line x1="18.41" y1="15.7" x2="20.23" y2="14.65" stroke-width="0.8"/>
-  <line x1="5.59" y1="8.3" x2="3.77" y2="9.35" stroke-width="0.8"/>
-  <line x1="5.59" y1="8.3" x2="3.77" y2="7.25" stroke-width="0.8"/>
-  <line x1="5.59" y1="15.7" x2="5.59" y2="17.8" stroke-width="0.8"/>
-  <line x1="5.59" y1="15.7" x2="3.77" y2="14.65" stroke-width="0.8"/>
-  <line x1="12" y1="12" x2="12" y2="9.9" stroke-width="0.8"/>
-  <line x1="12" y1="19.4" x2="12" y2="21.5" stroke-width="0.8"/>
-  <line x1="12" y1="12" x2="13.82" y2="13.05" stroke-width="0.8"/>
-  <line x1="12" y1="12" x2="10.18" y2="13.05" stroke-width="0.8"/>
-  <line x1="12" y1="19.4" x2="13.82" y2="20.45" stroke-width="0.8"/>
-  <line x1="12" y1="19.4" x2="10.18" y2="20.45" stroke-width="0.8"/>
-  <polygon points="12,4.6 18.41,8.3 12,12 5.59,8.3" fill="none"/>
-  <polygon points="18.41,8.3 12,12 12,19.4 18.41,15.7" fill="none"/>
-  <polygon points="5.59,8.3 12,12 12,19.4 5.59,15.7" fill="none"/>
+  <path d="M5.88 7.5 L5.88 16.5 A6.12 3.54 0 0 0 18.12 16.5 L18.12 7.5 Z" fill="#a4a4a4"/>
+  <ellipse cx="12" cy="7.5" rx="6.12" ry="3.54" fill="#747474"/>
+  <path d="M5.88 7.5 L5.88 16.5 A6.12 3.54 0 0 0 18.12 16.5 L18.12 7.5 A6.12 3.54 0 0 1 5.88 7.5 Z" fill="#2563eb" stroke="none" fill-opacity="0.45"/>
+  <ellipse cx="12" cy="7.5" rx="6.12" ry="3.54" fill="#2563eb" stroke="#2563eb" fill-opacity="0.15" stroke-width="1.2" stroke-dasharray="1 2.8"/>
 </svg>

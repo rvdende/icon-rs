@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#262626" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">
-  <polygon points="8,10.3 12.76,13.05 8,15.8 3.24,13.05" fill="none" stroke-opacity="0.4" stroke-width="0.8"/>
-  <polygon points="12.76,13.05 8,15.8 8,21.3 12.76,18.55" fill="none" stroke-opacity="0.4" stroke-width="0.8"/>
-  <polygon points="3.24,13.05 8,15.8 8,21.3 3.24,18.55" fill="none" stroke-opacity="0.4" stroke-width="0.8"/>
-  <polygon points="16,2.7 20.76,5.45 16,8.2 11.24,5.45" fill="#ffffff"/>
-  <polygon points="20.76,5.45 16,8.2 16,13.7 20.76,10.95" fill="#a3a3a3"/>
-  <polygon points="11.24,5.45 16,8.2 16,13.7 11.24,10.95" fill="#737373"/>
-  <line x1="8" y1="15.8" x2="10.73" y2="12.39" stroke="#2563eb" stroke-width="1.5"/>
-  <polygon points="12.43,10.26 11.55,13.92 9.05,11.92" fill="#2563eb" stroke="#2563eb"/>
+  <polygon points="16.8,2.8 20.78,5.1 20.78,9.7 16.8,12 12.82,9.7 12.82,5.1" fill="#2563eb" stroke="none" fill-opacity="0.15"/>
+  <polygon points="16.8,2.8 20.78,5.1 20.78,9.7 16.8,12 12.82,9.7 12.82,5.1" stroke="#2563eb" stroke-width="1.1" stroke-dasharray="1.1 2.7"/>
+  <polygon points="16.8,2.8 20.78,5.1 16.8,7.4 12.82,5.1" fill="#2563eb" stroke="none" fill-opacity="0.25"/>
+  <polygon points="7.2,12 11.18,14.3 7.2,16.6 3.22,14.3" fill="#ffffff"/>
+  <polygon points="11.18,14.3 7.2,16.6 7.2,21.2 11.18,18.9" fill="#a4a4a4"/>
+  <polygon points="3.22,14.3 7.2,16.6 7.2,21.2 3.22,18.9" fill="#747474"/>
+  <line x1="9.79" y1="15.57" x2="12.75" y2="11.72" stroke-width="1.4"/>
+  <polygon points="14.21,9.81 13.49,13.05 11.27,11.34" fill="#262626" stroke-width="0.6"/>
 </svg>

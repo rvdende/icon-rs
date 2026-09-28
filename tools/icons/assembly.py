@@ -1,8 +1,9 @@
 """Assembly mates, relations and tools, and the document types (kind "solid").
 
-Mates share one scene: a fixed part (the ground, lit a step darker: SOFT top) and a moving part
-(TOP/MID/SHADE). ACCENT shows the motion the mate allows (arrows) or the thing it constrains.
-The document types share one base: a thin square platform with the type's emblem on it.
+Roles: context geometry is neutral (TOP/SOFT/MID/SHADE); ACCENT marks only what explains the tool.
+Mates show two parts (the fixed one lit a step darker, SOFT top) and ACCENT for the motion the mate
+allows or the faces it constrains. Relations accent the coupled motion. The document types share one
+base, a square platform, with the type's emblem on it in ACCENT.
 """
 import math
 from common import *
@@ -98,6 +99,18 @@ def flat_gear(o, cx, cy, z0, z1, r_out, r_root, teeth, phase=0.0, top=TOP, side=
     return els
 
 
+TINT = 'stroke="none" fill-opacity="0.45"'
+
+
+def tint_box(o, x0, x1, y0, y1, z0, z1):
+    """A box marked as the input or emblem: neutral faces under an accent wash."""
+    return [box(o, x0, x1, y0, y1, z0, z1), box(o, x0, x1, y0, y1, z0, z1, ACCENT, ACCENT, ACCENT, TINT)]
+
+
+def tint_cyl(o, cx, cy, z0, z1, r):
+    return [cylinder(o, cx, cy, z0, z1, r), cylinder(o, cx, cy, z0, z1, r, ACCENT, ACCENT, TINT)]
+
+
 def ground(o, x1, y1, z1=2.0):
     return box(o, 0, x1, 0, y1, 0, z1, **GROUND)
 
@@ -128,12 +141,12 @@ def mate_fastened():
 
 @icon("mate-revolute", "solid", "Revolute mate")
 def mate_revolute():
-    o = (12, 9.9)
+    o = (12, 17)
     return [
-        ground(o, 9, 9),
-        cylinder(o, 4.5, 4.5, 2, 5, 2.8),
-        cylinder(o, 4.5, 4.5, 5, 8.5, 1.1),
-        spin(o, 4.5, 4.5, 3.5, 4.4),
+        cylinder(o, 0, 0, 0, 11, 1.3, SOFT, MID),
+        cylinder(o, 0, 0, 4, 6.8, 4.4),
+        cylinder(o, 0, 0, 6.8, 11, 1.3, SOFT, MID),
+        spin(o, 0, 0, 4.6, 5.9, 160, 25),
     ]
 
 
@@ -164,15 +177,15 @@ def mate_planar():
 
 @icon("mate-cylindrical", "solid", "Cylindrical mate")
 def mate_cylindrical():
-    o = (11.2, 11.5)
+    o = (10.3, 17.8)
     P = projector(o)
-    rx = P(4, 4, 0)[0] + 5.8
+    ax = P(0, 0, 0)[0] + 6.9
     return [
-        ground(o, 8, 8),
-        cylinder(o, 4, 4, 2, 11.5, 1.1),
-        cylinder(o, 4, 4, 5, 7.5, 2.6),
-        spin(o, 4, 4, 5.4, 4.0, 190, 60),
-        *darrow((rx, P(4, 4, 1.2)[1]), (rx, P(4, 4, 11.2)[1]), ACCENT, 2.6, 2.4),
+        cylinder(o, 0, 0, 0, 13, 1.3, SOFT, MID),
+        cylinder(o, 0, 0, 4.5, 8.5, 3),
+        cylinder(o, 0, 0, 8.5, 13, 1.3, SOFT, MID),
+        spin(o, 0, 0, 5.3, 4.4, 165, 30),
+        *darrow((ax, P(0, 0, 1.5)[1]), (ax, P(0, 0, 13)[1]), ACCENT, 2.6, 2.4),
     ]
 
 
@@ -208,13 +221,13 @@ def mate_ball():
 def mate_parallel():
     o = (12, 9.4)
     P = projector(o)
-    tint = lambda x0, x1, y0, y1, z: poly([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)], ACCENT,
-                                          'stroke="none" fill-opacity="0.45"')
+    face = lambda x0, x1, y0, y1, z: poly([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)], ACCENT,
+                                          'stroke="none" fill-opacity="0.25"')
     return [
         ground(o, 10, 10, 1.8),
-        tint(0, 10, 0, 10, 1.8),
+        face(0, 10, 0, 10, 1.8),
         box(o, 2.5, 7.5, 2.5, 7.5, 5.8, 7.4),
-        tint(2.5, 7.5, 2.5, 7.5, 7.4),
+        face(2.5, 7.5, 2.5, 7.5, 7.4),
     ]
 
 
@@ -252,33 +265,31 @@ def relations():
 
 @icon("gear-relation", "solid", "Gear relation")
 def gear_relation():
-    o = (8.8, 11.4)
-    ra, rb = 5.2, 3.9
+    o = (9.4, 11.4)
+    ra, rb = 5.6, 4.1
     return [
-        *flat_gear(o, 0, 0, 0, 1.6, ra, ra - 1.4, 9),
-        *flat_gear(o, ra + rb - 1.2, 0, 0, 1.6, rb, rb - 1.4, 7, 0.5),
-        spin(o, 0, 0, 2, 2.6, 200, 20, ACCENT, 2.4, 2.4),
+        *flat_gear(o, 0, 0, 0, 1.5, ra, ra - 1.7, 7),
+        *flat_gear(o, ra + rb - 1.4, 0, 0, 1.5, rb, rb - 1.7, 5, 0.5),
+        spin(o, 0, 0, 1.5, 2.6, 200, 20, ACCENT, 2.4, 2.4),
     ]
 
 
 @icon("rack-pinion", "solid", "Rack and pinion relation")
 def rack_pinion():
-    o = (12.7, 6.1)
+    o = (12.2, 6.4)
     P = projector(o)
-    r = 3.8
-    rack_y, tooth = 7.2, 1.0
-    x = 0.0
+    r, tooth = 4.3, 1.5
+    rack_y, h = 7.6, 1.6
     edge = [(0, rack_y)]
-    while x < 13.5:
-        edge += [(x + 0.4, rack_y), (x + 0.7, rack_y - tooth), (x + 1.5, rack_y - tooth), (x + 1.8, rack_y)]
-        x += 2.2
+    for x in (1.2, 4.6, 8, 11.4):
+        edge += [(x, rack_y), (x + 0.5, rack_y - tooth), (x + 1.6, rack_y - tooth), (x + 2.1, rack_y)]
     edge += [(14, rack_y)]
-    top = [P(u, v, 1.6) for u, v in edge] + [P(14, rack_y + 3, 1.6), P(0, rack_y + 3, 1.6)]
+    top = [P(u, v, h) for u, v in edge] + [P(14, rack_y + 3, h), P(0, rack_y + 3, h)]
     return [
-        box(o, 0, 14, rack_y, rack_y + 3, 0, 1.6, **GROUND),
+        box(o, 0, 14, rack_y, rack_y + 3, 0, h, **GROUND),
         poly(top, SOFT),
-        *flat_gear(o, 5.5, 2.4, 0, 1.6, r, r - 1.1, 8),
-        arrow(*P(9.5, rack_y + 1.5, 1.6), *P(14.5, rack_y + 1.5, 1.6), 2.6, 2.4, ACCENT),
+        *flat_gear(o, 5.8, rack_y - r - 0.1, 0, h, r, r - tooth - 0.2, 6, 0.1),
+        arrow(*P(9.4, rack_y + 1.5, h), *P(14.6, rack_y + 1.5, h), 2.6, 2.4, ACCENT),
     ]
 
 
@@ -373,37 +384,30 @@ def explode():
 
 
 def mini_assembly(o):
-    return [ground(o, 8, 8, 1.8), box(o, 1.5, 5.5, 1.5, 5.5, 1.8, 5.8)]
+    return [ground(o, 9, 9, 2), box(o, 1.8, 6.2, 1.8, 6.2, 2, 6.8)]
+
+
+BADGE_O = (10.4, 11.4)
 
 
 @icon("named-positions", "solid", "Named positions")
 def named_positions():
-    o = (9.2, 11.8)
-    return [
-        *mini_assembly(o),
-        path("M15.5 2.8 H21 V12 L18.25 9.8 L15.5 12 Z", ACCENT, acc()),
-    ]
+    return [*mini_assembly(BADGE_O), path("M16.9 2.5 H21.3 V9.8 L19.1 8.1 L16.9 9.8 Z", ACCENT, acc())]
 
 
 @icon("display-states", "solid", "Display states")
 def display_states():
-    o = (9.2, 11.8)
-    eye = "M13.8 6.5 Q17.6 2 21.4 6.5 Q17.6 11 13.8 6.5 Z"
-    return [
-        *mini_assembly(o),
-        path(eye, TOP, acc('stroke-width="1.3"')),
-        circle(17.6, 6.5, 1.5, ACCENT, acc()),
-    ]
+    eye = "M15.1 5.8 Q18.3 2 21.5 5.8 Q18.3 9.6 15.1 5.8 Z"
+    return [*mini_assembly(BADGE_O), path(eye, TOP, acc()), circle(18.3, 5.8, 1.2, ACCENT, acc())]
 
 
 @icon("assembly-properties", "solid", "Assembly properties")
 def assembly_properties():
-    o = (9.2, 11.8)
     return [
-        *mini_assembly(o),
-        circle(17.6, 6.4, 3.8, ACCENT, acc()),
-        line(17.6, 6, 17.6, 8.4, f'stroke="{TOP}" stroke-width="1.5"'),
-        circle(17.6, 4.1, 0.85, TOP, 'stroke="none"'),
+        *mini_assembly(BADGE_O),
+        circle(18.6, 5.4, 3.1, ACCENT, acc()),
+        line(18.6, 5.2, 18.6, 7, f'stroke="{TOP}" stroke-width="1.3"'),
+        circle(18.6, 3.6, 0.75, TOP, 'stroke="none"'),
     ]
 
 
@@ -432,13 +436,13 @@ DOC_O = (12, 10.2)
 @icon("assembly", "solid", "Assembly")
 def assembly():
     o = DOC_O
-    return [platform(o), box(o, 1.2, 5.4, 4.6, 8.8, PZ, PZ + 4.2), cylinder(o, 6.6, 3.4, PZ, PZ + 6, 2.1)]
+    return [platform(o), *tint_box(o, 1, 5.6, 4.4, 9, PZ, PZ + 4.6), *tint_cyl(o, 6.6, 3.4, PZ, PZ + 7, 2.3)]
 
 
 @icon("part-studio", "solid", "Part Studio")
 def part_studio():
     o = DOC_O
-    return [platform(o), box(o, 2, 8, 2, 8, PZ, PZ + 6)]
+    return [platform(o), *tint_box(o, 1.5, 8.5, 1.5, 8.5, PZ, PZ + 7)]
 
 
 @icon("material-library", "solid", "Material library")
@@ -463,15 +467,13 @@ def feature_studio():
 def cam_studio():
     o = DOC_O
     P = projector(o)
-    z = PZ + 2.4
+    z = PZ + 2.2
     return [
         platform(o),
         box(o, 1, 9, 1, 9, PZ, z),
-        curved_arrow([P(6.5, 2.4, z), P(2.4, 2.4, z), P(2.4, 8.2, z)], 2.4, 2.3, ACCENT),
-        cylinder(o, 6.5, 2.4, z, z + 7, 1.35),
-        path(" ".join(f"M{f(P(6.5, 2.4, zz)[0] - 1.6)} {f(P(6.5, 2.4, zz)[1] + 0.3)} "
-                      f"L{f(P(6.5, 2.4, zz)[0] + 1.6)} {f(P(6.5, 2.4, zz)[1] - 0.8)}" for zz in (1.8 + z, 3.6 + z)),
-             None, THIN),
+        polyline([P(6.4, 2.8, z), P(3, 2.8, z)], acc('stroke-width="1.4"')),
+        arrow(*P(6.4, 4.6, z), *P(6.4, 9.4, z), 2.6, 2.4, ACCENT),
+        cylinder(o, 6.4, 2.8, z, z + 7, 1.7),
     ]
 
 
@@ -480,11 +482,11 @@ def pcb_studio():
     o = DOC_O
     P = projector(o)
     z = PZ
-    trace = acc('stroke-width="1.2"')
+    trace = acc('stroke-width="1.4"')
     els = [platform(o)]
-    for y in (2.2, 4, 5.8):
-        els += [line(*P(5, y, z), *P(8.4, y, z), trace), circle(*P(8.4, y, z), 0.8, ACCENT, 'stroke="none"')]
-    els.append(box(o, 1.2, 5.4, 1.2, 6.8, z, z + 1.4))
+    for y in (2.4, 5.2):
+        els += [line(*P(4.6, y, z), *P(8.6, y, z), trace), circle(*P(8.6, y, z), 0.95, ACCENT, 'stroke="none"')]
+    els.append(box(o, 1, 4.6, 1, 6.6, z, z + 1.6))
     return els
 
 
@@ -492,9 +494,9 @@ def pcb_studio():
 def render_studio():
     o = DOC_O
     P = projector(o)
-    cx, cy = P(5, 5, PZ + 3.6)
-    sx, sy = 18.8, 5.1
+    cx, cy = P(5, 5, PZ + 4)
+    sx, sy = 18.7, 5.4
     rays = [line(sx + 2.2 * math.cos(math.radians(a)), sy + 2.2 * math.sin(math.radians(a)),
-                 sx + 2.9 * math.cos(math.radians(a)), sy + 2.9 * math.sin(math.radians(a)), acc('stroke-width="1.2"'))
+                 sx + 2.9 * math.cos(math.radians(a)), sy + 2.9 * math.sin(math.radians(a)), acc('stroke-width="1.3"'))
             for a in range(0, 360, 45)]
-    return [platform(o), *sphere(cx, cy, 3.9), circle(sx, sy, 1.2, ACCENT, acc()), *rays]
+    return [platform(o), *sphere(cx, cy, 4.3), circle(sx, sy, 1.3, ACCENT, acc()), *rays]

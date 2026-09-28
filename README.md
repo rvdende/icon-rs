@@ -19,8 +19,8 @@ let light: &str = EXTRUDE.svg;       // for light backgrounds
 let dark: &str = EXTRUDE.svg_dark;   // for dark backgrounds
 let svg = icon_rs::get("loft").unwrap().themed(is_dark);
 
-// Any other theme: a line colour plus one spot colour, shaded automatically.
-let palette = Palette::from_spot(Rgb(0x0c, 0x4a, 0x6e), Rgb(0x38, 0xbd, 0xf8));
+// Any other theme: a line colour and an accent. Faces are neutral tints of the line.
+let palette = Palette::new(Rgb(0x0c, 0x4a, 0x6e), Rgb(0xf5, 0x9e, 0x0b));
 let custom: String = EXTRUDE.recolor(&palette);
 
 // Glyph and line icons are ink plus a little accent: paint the ink any colour.
@@ -39,7 +39,7 @@ icon-rs = { version = "0.2", features = ["bevy_color"] }
 ```rust
 use bevy_color::{Color, palettes::tailwind};
 
-let palette = Palette::from_spot(tailwind::SKY_900, Color::srgb(0.2, 0.7, 0.95));
+let palette = Palette::new(tailwind::SLATE_800, Color::srgb(0.2, 0.7, 0.95));
 let mid: Color = palette.mid.into();
 ```
 

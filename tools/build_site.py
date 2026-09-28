@@ -1,9 +1,9 @@
 """Builds the GitHub Pages site into site/. Run from anywhere: python3 tools/build_site.py
 
 Everything the page knows comes from the crate: the icon list, order and constant names from the
-icons! macro in src/lib.rs, the LIGHT and DARK palettes and the from_spot tint factors from the
+icons! macro in src/lib.rs, the LIGHT and DARK palettes and the Palette::new tint factors from the
 same file, and the SVG sources from icons/. The page recolours icons in the browser with a port
-of Icon::recolor and Palette::from_spot.
+of Icon::recolor and Palette::new.
 """
 import html, json, os, re, shutil
 
@@ -23,8 +23,8 @@ def palette(name):
             re.findall(r"(\w+): Rgb\(0x(\w\w), 0x(\w\w), 0x(\w\w)\)", body)}
 
 
-tints = re.search(r"\{ \((\d+), (\d+), (\d+)\) \} else \{ \((\d+), (\d+), (\d+)\) \}", lib).groups()
-tints = {"dark": list(map(int, tints[:3])), "light": list(map(int, tints[3:]))}
+tints = re.search(r"\(Rgb::BLACK, \[(\d+), (\d+), (\d+), (\d+)\]\)\s*\} else \{\s*\(Rgb::WHITE, \[(\d+), (\d+), (\d+), (\d+)\]\)", lib).groups()
+tints = {"dark": list(map(int, tints[:4])), "light": list(map(int, tints[4:]))}
 generated = open(os.path.join(ROOT, "src", "generated.rs")).read()
 icons = [
     {"konst": k, "name": n, "kind": kind, "title": t.replace('\\"', '"'),
@@ -241,17 +241,12 @@ page = r"""<!doctype html>
     <section class="palette" aria-label="Palette playground">
       <div>
         <h2>Palette</h2>
-        <p class="hint">Pick a line and a spot colour; the face shades are derived from the spot, the same way <code>Palette::from_spot</code> does it. The accent marks what each tool acts on.</p>
+        <p class="hint">Pick a line colour and an accent. Faces are neutral tints of the line (they are context); the accent marks what each tool acts on or creates. Same maths as <code>Palette::new</code>.</p>
         <div class="pickers">
           <div class="picker">
             <label for="ink-hex">Line</label>
             <input type="color" id="ink-color" aria-label="Line colour">
             <input type="text" id="ink-hex" pattern="#?[0-9a-fA-F]{6}" spellcheck="false">
-          </div>
-          <div class="picker">
-            <label for="spot-hex">Spot</label>
-            <input type="color" id="spot-color" aria-label="Spot colour">
-            <input type="text" id="spot-hex" pattern="#?[0-9a-fA-F]{6}" spellcheck="false">
           </div>
           <div class="picker">
             <label for="accent-hex">Accent</label>
@@ -302,12 +297,12 @@ const CRATE = "__CRATE__", VERSION = "__DEP_VERSION__";
 const SLOTS = ["ink", "top", "soft", "mid", "shade", "accent"];
 const PRESETS = [
   { name: "Default" },
-  { name: "Slate", ink: "#0f172a", spot: "#94a3b8" },
-  { name: "Sky", ink: "#0c4a6e", spot: "#38bdf8" },
-  { name: "Teal", ink: "#134e4a", spot: "#2dd4bf" },
-  { name: "Amber", ink: "#451a03", spot: "#f59e0b" },
-  { name: "Rose", ink: "#4c0519", spot: "#fb7185" },
-  { name: "Night", ink: "#e0f2fe", spot: "#1e40af" },
+  { name: "Slate", ink: "#0f172a", accent: "#0ea5e9" },
+  { name: "Teal", ink: "#134e4a", accent: "#14b8a6" },
+  { name: "Amber", ink: "#292524", accent: "#f59e0b" },
+  { name: "Rose", ink: "#27272a", accent: "#e11d48" },
+  { name: "Violet", ink: "#1e1b4b", accent: "#8b5cf6" },
+  { name: "Night", ink: "#e0f2fe", accent: "#38bdf8" },
 ];
 const byName = Object.fromEntries(ICONS.map(i => [i.name, i]));
 const $ = id => document.getElementById(id);
@@ -319,16 +314,17 @@ const store = {
   },
 };
 
-// Ports of Rgb::mix, Rgb::luma and Palette::from_spot; integer maths so results match exactly.
+// Ports of Rgb::mix, Rgb::luma and Palette::new; integer maths so results match exactly.
 const parse = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim()); return m ? "#" + m[1].toLowerCase() : null; };
 const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
 const toHex = c => "#" + c.map(v => v.toString(16).padStart(2, "0")).join("");
 const mix = (a, b, pct) => toHex(rgb(a).map((v, i) => Math.floor((v * (100 - pct) + rgb(b)[i] * pct + 50) / 100)));
 const luma = hex => { const [r, g, b] = rgb(hex); return Math.floor((r * 299 + g * 587 + b * 114) / 1000); };
-function fromSpot(ink, spot) {
-  const [top, soft, shade] = luma(ink) > luma(spot) ? TINTS.dark : TINTS.light;
-  const accent = luma(ink) > luma(spot) ? PALETTES.dark.accent : PALETTES.light.accent;
-  return { ink, top: mix(spot, "#ffffff", top), soft: mix(spot, "#ffffff", soft), mid: spot, shade: mix(spot, "#000000", shade), accent };
+function paletteNew(ink, accent) {
+  const dark = luma(ink) > 127;
+  const towards = dark ? "#000000" : "#ffffff";
+  const [top, soft, mid, shade] = dark ? TINTS.dark : TINTS.light;
+  return { ink, top: mix(ink, towards, top), soft: mix(ink, towards, soft), mid: mix(ink, towards, mid), shade: mix(ink, towards, shade), accent };
 }
 
 // Port of Icon::recolor: every light-palette colour maps to its slot in one pass.
@@ -340,22 +336,23 @@ const dataUri = svg => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
 
 const state = {
   theme: document.documentElement.dataset.theme,
-  custom: (() => { try { return JSON.parse(store.get("palette")); } catch { return null; } })(),
+  custom: (() => {
+    try {
+      const c = JSON.parse(store.get("palette"));
+      return c && c.ink && c.accent ? { ink: c.ink, accent: c.accent } : null;  // ignore old {ink, spot}
+    } catch { return null; }
+  })(),
 };
 function current() {
-  if (!state.custom) return PALETTES[state.theme];
-  const p = fromSpot(state.custom.ink, state.custom.spot);
-  if (state.custom.accent) p.accent = state.custom.accent;
-  return p;
+  return state.custom ? paletteNew(state.custom.ink, state.custom.accent) : PALETTES[state.theme];
 }
 const rgbLit = hex => `Rgb(${rgb(hex).map(v => "0x" + v.toString(16).padStart(2, "0")).join(", ")})`;
 
 function paletteExpr() {
-  if (state.custom) return `Palette::from_spot(
+  if (state.custom) return `Palette::new(
     ${rgbLit(state.custom.ink)},  // line
-    ${rgbLit(state.custom.spot)}, // spot
-)` + (state.custom.accent ? `
-.with_accent(${rgbLit(state.custom.accent)})` : "");
+    ${rgbLit(state.custom.accent)}, // accent
+)`;
   return state.theme === "dark" ? "Palette::DARK" : "Palette::LIGHT";
 }
 
@@ -363,16 +360,14 @@ function render() {
   const palette = current();
   document.querySelectorAll(".tile").forEach(t => { t.querySelector("img").src = dataUri(recolor(byName[t.dataset.name].svg, palette)); });
 
-  const ink = state.custom ? state.custom.ink : palette.ink;
-  const spot = state.custom ? state.custom.spot : palette.mid;
-  for (const [key, value] of [["ink", ink], ["spot", spot], ["accent", palette.accent]]) {
+  for (const [key, value] of [["ink", palette.ink], ["accent", palette.accent]]) {
     $(`${key}-color`).value = value;
     if (document.activeElement !== $(`${key}-hex`)) $(`${key}-hex`).value = value;
   }
   $("swatches").innerHTML = SLOTS.map(s => `<div class="swatch"><b style="background:${palette[s]}"></b>${s}<code>${palette[s]}</code></div>`).join("");
   document.querySelectorAll(".chip").forEach(c => {
     const p = PRESETS[+c.dataset.i];
-    const on = p.ink ? state.custom?.ink === p.ink && state.custom?.spot === p.spot : !state.custom;
+    const on = p.ink ? state.custom?.ink === p.ink && state.custom?.accent === p.accent : !state.custom;
     c.setAttribute("aria-pressed", on);
   });
   setCode("code-palette", `use icon_rs::{Palette, Rgb};
@@ -394,8 +389,8 @@ function setCode(id, src) {
   }).join("\n");
 }
 
-function setCustom(ink, spot, accent) {
-  state.custom = ink && spot ? (accent ? { ink, spot, accent } : { ink, spot }) : null;
+function setCustom(ink, accent) {
+  state.custom = ink && accent ? { ink, accent } : null;
   store.set("palette", state.custom ? JSON.stringify(state.custom) : null);
   render();
 }
@@ -415,16 +410,12 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
 });
 
 // Palette inputs
-function currentPair() {
-  const p = current();
-  return state.custom ? { ...state.custom } : { ink: p.ink, spot: p.mid };
-}
 function pick(key, hex) {
-  const pair = currentPair();
-  pair[key] = hex;
-  setCustom(pair.ink, pair.spot, pair.accent);
+  const p = current();
+  const pair = { ink: p.ink, accent: p.accent, [key]: hex };
+  setCustom(pair.ink, pair.accent);
 }
-for (const key of ["ink", "spot", "accent"]) {
+for (const key of ["ink", "accent"]) {
   $(`${key}-color`).addEventListener("input", e => pick(key, e.target.value));
   $(`${key}-hex`).addEventListener("input", e => {
     const hex = parse(e.target.value);
@@ -433,12 +424,12 @@ for (const key of ["ink", "spot", "accent"]) {
   $(`${key}-hex`).addEventListener("blur", render);
 }
 $("presets").innerHTML = PRESETS.map((p, i) => {
-  const dot = p.ink ? `<i style="background:${p.spot};border-color:${p.ink}"></i>` : `<i style="background:${PALETTES.light.mid};border-color:${PALETTES.light.ink}"></i>`;
+  const dot = p.ink ? `<i style="background:${p.accent};border-color:${p.ink}"></i>` : `<i style="background:${PALETTES.light.accent};border-color:${PALETTES.light.ink}"></i>`;
   return `<button class="chip" data-i="${i}" aria-pressed="false">${dot}${p.name}</button>`;
 }).join("");
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
   const p = PRESETS[+c.dataset.i];
-  setCustom(p.ink, p.spot);
+  setCustom(p.ink, p.accent);
 }));
 
 // Icon sheet
