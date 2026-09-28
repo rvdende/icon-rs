@@ -1,6 +1,6 @@
 [package]
 name = "icon-rs"
-version = "0.3.5"
+version = "0.3.6"
 edition = "2024"
 description = "SVG icons for CAD apps: isometric features and mates, sketch tools, constraint glyphs and UI icons"
 license = "MIT OR Apache-2.0"

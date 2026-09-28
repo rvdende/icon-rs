@@ -312,6 +312,12 @@ def menu():
     return [line(4, 6, 20, 6), line(4, 12, 20, 12), line(4, 18, 20, 18)]
 
 
+@icon("more-horizontal", "line", "More")
+def more_horizontal():
+    # The overflow menu's three dots (a single mark: INK only).
+    return [circle(x, 12, 1.6, INK, 'stroke-width="0.9"') for x in (5, 12, 19)]
+
+
 @icon("open-external", "line", "Open")
 def open_external():
     return [

@@ -132,6 +132,12 @@ def custom_table():
     return [_acc(line(3, 9.5, 21, 9.5)), rect(3, 4, 18, 16, R), path("M3 14.75 H21 M9.5 9.5 V20")]
 
 
+@icon("column-add", "line", "Add column")
+def column_add():
+    # A table with a header row, and a plus where the new column goes (right).
+    return [rect(3, 4, 11, 16, R), path("M3 9.5 H14 M8.5 4 V20"), _acc(_plus(18.5, 12))]
+
+
 @icon("configurations", "line", "Configurations")
 def configurations():
     out = []
