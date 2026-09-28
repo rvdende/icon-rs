@@ -475,3 +475,39 @@ def mass_properties():
 @icon("part", "solid", "Part")
 def part():
     return _cube((12, 12), 8.4)
+
+
+@icon("sketch", "solid", "Sketch")
+def sketch():
+    # A sketch plane (context) with the profile drawn on it (output, accent) and the pencil
+    # drawing it, its tip on the profile's far corner.
+    o = (12, 8.8)
+    P = projector(o)
+    s, a, b, r = 11, 2.4, 8.6, 2.8
+    plane = [P(0, 0, 0), P(s, 0, 0), P(s, s, 0), P(0, s, 0)]
+    arc = [P(b - r + r * math.cos(math.radians(t)), b - r + r * math.sin(math.radians(t)), 0) for t in range(0, 91, 10)]
+    prof = [P(a, a, 0), P(b, a, 0)] + arc + [P(a, b, 0)]
+    tip = P(a, a, 0)
+    ang = math.radians(-68)
+    ux, uy = math.cos(ang), math.sin(ang)
+    nx, ny = -uy, ux
+    L, w, cone = 6.4, 1.6, 2.4
+    base = (tip[0] + ux * cone, tip[1] + uy * cone)
+    end = (base[0] + ux * L, base[1] + uy * L)
+    body = [(base[0] + nx * w, base[1] + ny * w), (end[0] + nx * w, end[1] + ny * w),
+            (end[0] - nx * w, end[1] - ny * w), (base[0] - nx * w, base[1] - ny * w)]
+    return [
+        poly(plane, TOP),
+        poly(prof, ACCENT, f'stroke="{ACCENT}" stroke-width="1.5" fill-opacity="0.15"'),
+        poly(body, SOFT),
+        poly([tip, body[0], body[3]], TOP),
+    ]
+
+
+@icon("surface", "solid", "Surface")
+def surface():
+    # A thin curved sheet with no real thickness: a surface body. Neutral, like part.
+    top = "M2.5 9.5 C7 3.5, 11 13.5, 15.5 7.5 L21.5 11.5 C17 17.5, 13 7.5, 8.5 13.5 Z"
+    edge = "M8.5 13.5 C13 7.5, 17 17.5, 21.5 11.5 L21.5 13.4 C17 19.4, 13 9.4, 8.5 15.4 Z"
+    left = "M2.5 9.5 L8.5 13.5 L8.5 15.4 L2.5 11.4 Z"
+    return [path(edge, SHADE), path(left, MID), path(top, TOP)]

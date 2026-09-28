@@ -464,6 +464,18 @@ def notifications():
     ]
 
 
+@icon("settings", "line", "Settings")
+def settings():
+    # Eight-toothed gear with rounded teeth; the hub (the part you "adjust") is accent.
+    pts = []
+    for k in range(8):
+        c = k * 45
+        for r, da in ((6.9, -22.5 + 7), (9, -9.5), (9, 9.5), (6.9, 22.5 - 7)):
+            a = math.radians(c + da)
+            pts.append((12 + r * math.cos(a), 12 + r * math.sin(a)))
+    return [path(_d(pts)), _acc(circle(12, 12, 2.9))]
+
+
 @icon("share", "line", "Share")
 def share():
     nodes = [(6, 12), (17.5, 5.75), (17.5, 18.25)]
