@@ -1,9 +1,9 @@
 # icon-rs
 
 Original SVG icons for CAD feature tools (extrude, revolve, sweep, loft, thicken, enclose, fillet,
+chamfer, shell, pattern, boolean), embedded as Rust constants.
 
 Browse the icons: https://rvdende.github.io/icon-rs/
-chamfer, shell, pattern, boolean), embedded as Rust constants.
 
 ```rust
 let svg: &str = icon_rs::EXTRUDE.svg;
