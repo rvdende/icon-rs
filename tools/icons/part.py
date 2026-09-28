@@ -389,17 +389,21 @@ def plane():
 
 @icon("mate-connector", "solid", "Mate connector")
 def mate_connector():
-    o = (12, 11.2)
+    # Context: the connector symbol, a disc on the floor plane with one quarter filled. Output:
+    # the accent triad rising from its centre (z up, x and y along the floor).
+    o = (12, 14.6)
     P = projector(o)
-    s, h = 9.5, 2
-    oc = (s / 2, s / 2, h)
-    w = 'stroke-width="1.3"'
+    r = 6.6
+    disc = iso_circle(o, 0, 0, 0, r)
+    wedge = [P(0, 0, 0)] + [P(r * math.cos(math.radians(t)), r * math.sin(math.radians(t)), 0) for t in range(0, 91, 6)]
+    w = 'stroke-width="1.4"'
     return [
-        box(o, 0, s, 0, s, 0, h),
-        arrow(*P(*oc), *P(oc[0], oc[1], h + 8.8), 2.8, 2.6, ACCENT, w),
-        arrow(*P(*oc), *P(oc[0] + 7, oc[1], h), 2.8, 2.6, ACCENT, w),
-        arrow(*P(*oc), *P(oc[0], oc[1] + 7, h), 2.8, 2.6, ACCENT, w),
-        circle(*P(*oc), 1.5, ACCENT, f'stroke="{TOP}" stroke-width="0.9"'),
+        poly(disc, TOP),
+        poly(wedge, MID, 'stroke-width="0.9"'),
+        arrow(*P(0, 0, 0), *P(0, 0, 12), 3, 2.8, ACCENT, w),
+        arrow(*P(0, 0, 0), *P(9.8, 0, 0), 3, 2.8, ACCENT, w),
+        arrow(*P(0, 0, 0), *P(0, 9.8, 0), 3, 2.8, ACCENT, w),
+        circle(*P(0, 0, 0), 1.3, ACCENT, 'stroke="none"'),
     ]
 
 

@@ -35,6 +35,7 @@ icons! {
     MATE_BALL => ("mate-ball", Solid, "Ball mate"),
     MATE_PARALLEL => ("mate-parallel", Solid, "Parallel mate"),
     MATE_TANGENT => ("mate-tangent", Solid, "Tangent mate"),
+    MATE_WIDTH => ("mate-width", Solid, "Width mate"),
     RELATIONS => ("relations", Solid, "Relations"),
     GEAR_RELATION => ("gear-relation", Solid, "Gear relation"),
     RACK_PINION => ("rack-pinion", Solid, "Rack and pinion relation"),

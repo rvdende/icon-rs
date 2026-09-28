@@ -125,121 +125,155 @@ def ghost_cyl(o, cx, cy, z0, z1, r, extra):
 
 
 # ---------------------------------------------------------------------------------------------
-# Mates
+# Mates: no bases. A thin floor rhombus (no thickness) is the only context where one is needed,
+# the parts are big, and the accent motion arrows keep clear of every body.
+
+FLOOR = 'fill-opacity="0.55" stroke-width="0.8"'
+
+
+def floor(o, x0, x1, y0, y1, z=0):
+    P = projector(o)
+    return poly([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)], SOFT, FLOOR)
+
+
+def halo(ps, cx, cy, r, w=3):
+    """A wide TOP stroke under the part of an accent curve that crosses a sphere, so the arrow
+    stands clear of the sphere's outline."""
+    inside = [p for p in ps if math.hypot(p[0] - cx, p[1] - cy) < r + 0.7]
+    return polyline(inside, f'stroke="{TOP}" stroke-width="{w}"') if len(inside) > 1 else ""
 
 
 @icon("mate-fastened", "solid", "Fastened mate")
 def mate_fastened():
-    o = (12, 9.6)
+    o = (12, 9.2)
     P = projector(o)
+    a, b = 2.4, 8.6
     return [
-        ground(o, 9, 9),
-        box(o, 1.8, 7.2, 1.8, 7.2, 2, 7.4),
-        polyline([P(1.8, 7.2, 2), P(7.2, 7.2, 2), P(7.2, 1.8, 2)], acc('stroke-width="2"')),
+        floor(o, 0, 11, 0, 11),
+        box(o, a, b, a, b, 0, 6.6),
+        polyline([P(a, b, 0), P(b, b, 0), P(b, a, 0)], acc('stroke-width="2.2"')),
     ]
 
 
 @icon("mate-revolute", "solid", "Revolute mate")
 def mate_revolute():
-    o = (12, 17)
+    o = (12, 15.6)
     return [
-        cylinder(o, 0, 0, 0, 11, 1.3, SOFT, MID),
-        cylinder(o, 0, 0, 4, 6.8, 4.4),
-        cylinder(o, 0, 0, 6.8, 11, 1.3, SOFT, MID),
-        spin(o, 0, 0, 4.6, 5.9, 160, 25),
+        cylinder(o, 0, 0, 2.6, 11.5, 1.3, SOFT, MID),
+        cylinder(o, 0, 0, 5, 7.8, 4.4),
+        cylinder(o, 0, 0, 7.8, 11.5, 1.3, SOFT, MID),
+        spin(o, 0, 0, 1.2, 5.2, 160, 22),
     ]
 
 
 @icon("mate-slider", "solid", "Slider mate")
 def mate_slider():
-    o = (7.9, 8.5)
+    o = (15.2, 9.6)
     P = projector(o)
     return [
-        box(o, 0, 15, 0, 5, 0, 2, **GROUND),
-        box(o, 5.5, 9.5, 0, 5, 2, 6),
-        arrow(*P(10.3, 2.5, 2), *P(15.2, 2.5, 2), 2.8, 2.6, ACCENT),
-        arrow(*P(4.7, 2.5, 2), *P(-0.2, 2.5, 2), 2.8, 2.6, ACCENT),
+        box(o, 0, 6, 0, 6, 0, 6),
+        *darrow(P(-4.4, 9.4, 0), P(9.2, 9.4, 0), ACCENT, 3, 2.8),
     ]
 
 
 @icon("mate-planar", "solid", "Planar mate")
 def mate_planar():
-    o = (12, 8.3)
+    # The floor plane with a 4-way cross along its diagonals (screen horizontal and vertical).
+    o = (12, 6.2)
     P = projector(o)
-    z, t = 2, 3.4
-    return [
-        ground(o, 10, 10, z),
-        box(o, 1.5, 6.5, 1.5, 6.5, z, t),
-        arrow(*P(7.2, 8.2, z), *P(-0.6, 8.2, z), 2.6, 2.4, ACCENT),
-        arrow(*P(8.2, 7.2, z), *P(8.2, -0.6, z), 2.6, 2.4, ACCENT),
-    ]
+    s = 11.5
+    cx, cy = P(s / 2, s / 2, 0)
+    ends = ((1.6, 0, 8.8, 0), (-1.6, 0, -8.8, 0), (0, 1.3, 0, 5.3), (0, -1.3, 0, -5.3))
+    return [floor(o, 0, s, 0, s),
+            *[arrow(cx + a, cy + b, cx + c, cy + d, 2.8, 2.7, ACCENT) for a, b, c, d in ends]]
 
 
 @icon("mate-cylindrical", "solid", "Cylindrical mate")
 def mate_cylindrical():
-    o = (10.3, 17.8)
+    o = (10.6, 17.9)
     P = projector(o)
-    ax = P(0, 0, 0)[0] + 6.9
+    ax = P(0, 0, 0)[0] + 7.6
     return [
-        cylinder(o, 0, 0, 0, 13, 1.3, SOFT, MID),
-        cylinder(o, 0, 0, 4.5, 8.5, 3),
-        cylinder(o, 0, 0, 8.5, 13, 1.3, SOFT, MID),
-        spin(o, 0, 0, 5.3, 4.4, 165, 30),
-        *darrow((ax, P(0, 0, 1.5)[1]), (ax, P(0, 0, 13)[1]), ACCENT, 2.6, 2.4),
+        cylinder(o, 0, 0, 3.2, 14.5, 1.3, SOFT, MID),
+        cylinder(o, 0, 0, 6.2, 10.2, 3),
+        cylinder(o, 0, 0, 10.2, 14.5, 1.3, SOFT, MID),
+        spin(o, 0, 0, 1.4, 4.2, 165, 25),
+        *darrow((ax, P(0, 0, 3.4)[1]), (ax, P(0, 0, 14.4)[1]), ACCENT, 2.8, 2.6),
     ]
 
 
 @icon("mate-pin-slot", "solid", "Pin slot mate")
 def mate_pin_slot():
-    o = (10, 8.5)
+    o = (9.9, 7.4)
     P = projector(o)
-    y, r = 3.5, 1.35
-    slot = ([(2.5 + r * math.cos(math.radians(a)), y + r * math.sin(math.radians(a))) for a in range(90, 271, 10)]
-            + [(10 + r * math.cos(math.radians(a)), y + r * math.sin(math.radians(a))) for a in range(-90, 91, 10)])
+    y, r, x0, x1 = 3.4, 1.7, 2.3, 11.7
+    slot = ([(x0 + r * math.cos(math.radians(a)), y + r * math.sin(math.radians(a))) for a in range(90, 271, 10)]
+            + [(x1 + r * math.cos(math.radians(a)), y + r * math.sin(math.radians(a))) for a in range(-90, 91, 10)])
     return [
-        box(o, 0, 12.5, 0, 7, 0, 2.5, **GROUND),
-        poly([P(x, yy, 2.5) for x, yy in slot], SHADE, THIN),
-        cylinder(o, 3.2, y, 2.5, 6.5, 1.2),
-        arrow(*P(5.4, y, 2.5), *P(11, y, 2.5), 2.6, 2.4, ACCENT),
+        floor(o, 0, 13.6, 0, 9),
+        poly([P(u, v, 0) for u, v in slot], SHADE, 'stroke-width="1"'),
+        cylinder(o, x0, y, 0, 5.5, 1.35),
+        arrow(*P(x0 + 0.4, y + 4, 0), *P(x1 + 1.8, y + 4, 0), 3, 2.8, ACCENT),
     ]
 
 
 @icon("mate-ball", "solid", "Ball mate")
 def mate_ball():
-    o = (12, 10.9)
-    P = projector(o)
-    cx, cy = P(4.5, 4.5, 2 + 3.4)
-    return [
-        ground(o, 9, 9),
-        *sphere(cx, cy, 3.6),
-        curved_arrow(arc_points(cx, cy, 6.6, 2.6, 30, 165), 2.6, 2.4, ACCENT),
-        curved_arrow(arc_points(cx, cy, 5.6, 5.6, 20, -95), 2.6, 2.4, ACCENT),
-    ]
+    cx, cy, r = 12, 12, 5
+    return [*sphere(cx, cy, r),
+            curved_arrow(arc_points(cx, cy, 8.8, 3.1, 25, 160), 2.8, 2.6, ACCENT),
+            curved_arrow(arc_points(cx, cy, 3.1, 8.8, -65, 65), 2.8, 2.6, ACCENT)]
 
 
 @icon("mate-parallel", "solid", "Parallel mate")
 def mate_parallel():
-    o = (12, 9.4)
+    o = (12, 12.4)
     P = projector(o)
-    face = lambda x0, x1, y0, y1, z: poly([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)], ACCENT,
-                                          'stroke="none" fill-opacity="0.25"')
+    s, t, gap = 8.6, 1, 7
+    w = acc('stroke-width="1.4"')
+
+    def mark(x, y):
+        (ax, ay), (bx, by) = P(x, y, t + 0.9), P(x, y, t + gap - 0.9)
+        return [line(ax, ay, bx, by, w), line(ax - 1.1, ay, ax + 1.1, ay, w), line(bx - 1.1, by, bx + 1.1, by, w)]
+
     return [
-        ground(o, 10, 10, 1.8),
-        face(0, 10, 0, 10, 1.8),
-        box(o, 2.5, 7.5, 2.5, 7.5, 5.8, 7.4),
-        face(2.5, 7.5, 2.5, 7.5, 7.4),
+        box(o, 0, s, 0, s, 0, t, **GROUND),
+        *mark(0, s + 1.2),
+        *mark(s + 1.2, 0),
+        box(o, 0, s, 0, s, t + gap, 2 * t + gap),
     ]
 
 
 @icon("mate-tangent", "solid", "Tangent mate")
 def mate_tangent():
-    o = (10.1, 9.2)
+    o = (10.6, 9)
     P = projector(o)
-    r, y, z = 2.8, 3.8, 1.8
+    r, y, x0, x1 = 3, 4, 2.2, 8.2
+    end = P(x1, y, r)
+    roll = [(end[0] + (r + 1.5) * 0.87 * math.cos(math.radians(a)), end[1] + (r + 1.5) * math.sin(math.radians(a)))
+            for a in range(200, 311, 5)]
     return [
-        box(o, 0, 12, 0, 7.6, 0, z, **GROUND),
-        line(*P(0.2, y, z), *P(11.8, y, z), acc('stroke-width="1.6"')),
-        *xcyl(o, 3, 8.6, y, z + r, r),
+        floor(o, 0, 11, 0, 8),
+        line(*P(0.3, y, 0), *P(10.7, y, 0), acc('stroke-width="1.6"')),
+        *xcyl(o, x0, x1, y, r, r),
+        curved_arrow(roll, 2.6, 2.4, ACCENT),
+    ]
+
+
+@icon("mate-width", "solid", "Width mate")
+def mate_width():
+    # Context: two thin parallel walls and the part between them. The accent arrows push in from
+    # both walls toward the centre; they are drawn last so the near wall never hides them.
+    o = (8.4, 8.6)
+    P = projector(o)
+    h, d, z, L = 6, 5.6, 2.3, 15
+    wall = lambda x: poly([P(x, 0, h), P(x, d, h), P(x, d, 0), P(x, 0, 0)], SOFT, 'stroke-width="0.9"')
+    return [
+        wall(0),
+        box(o, 5.2, 9.8, 0.6, d - 0.6, 0, 4.6),
+        wall(L),
+        arrow(*P(0.6, d / 2, z), *P(4.7, d / 2, z), 2.8, 2.7, ACCENT),
+        arrow(*P(L - 0.6, d / 2, z), *P(10.3, d / 2, z), 2.8, 2.7, ACCENT),
     ]
 
 
