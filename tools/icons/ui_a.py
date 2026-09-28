@@ -275,6 +275,18 @@ def sort_descending():
     ]
 
 
+@icon("reorder", "line", "Reorder")
+def reorder():
+    # Up and down arrows side by side: toggles reordering a list. A control, so ink only.
+    return [*_arrow(8.5, 19, 8.5, 5, 3.5), *_arrow(15.5, 5, 15.5, 19, 3.5)]
+
+
+@icon("drag-handle", "line", "Drag handle")
+def drag_handle():
+    # Two columns of three dots: grab here to drag. Filled dots, so they stay solid at 12 px.
+    return [circle(x, y, 1.6, INK, 'stroke="none"') for x in (9, 15) for y in (6, 12, 18)]
+
+
 @icon("arrow-up", "line", "Arrow up")
 def arrow_up():
     return _arrow(12, 19, 12, 5)

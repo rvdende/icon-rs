@@ -130,6 +130,8 @@ icons! {
     SEARCH => ("search", Line, "Search"),
     FILTER => ("filter", Line, "Filter"),
     SORT_DESCENDING => ("sort-descending", Line, "Sort descending"),
+    REORDER => ("reorder", Line, "Reorder"),
+    DRAG_HANDLE => ("drag-handle", Line, "Drag handle"),
     ARROW_UP => ("arrow-up", Line, "Arrow up"),
     ARROW_DOWN => ("arrow-down", Line, "Arrow down"),
     ARROW_UP_RIGHT => ("arrow-up-right", Line, "Arrow up-right"),
