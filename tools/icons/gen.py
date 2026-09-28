@@ -6,7 +6,7 @@
 Each module in MODULES registers icons with @icon from common.py. The full run validates every
 icon (unique names, palette colours allowed for its kind, well-formed XML) before writing.
 """
-import argparse, importlib, os, re, sys
+import argparse, importlib, os, re, subprocess, sys, tempfile
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +18,14 @@ import common  # noqa: E402
 # Toolbar order: modules in this order, icons in each module in definition order.
 MODULES = ["part", "assembly", "sketch", "glyphs", "ui_a", "ui_b"]
 RUST_KIND = {"solid": "Solid", "sketch": "Sketch", "glyph": "Glyph", "line": "Line"}
+
+# Solid and sketch icons are drawn on the shared 24-unit grid but rarely fill it, which makes them
+# hard to read at toolbar size. The fitting pass zooms each one's view box to its ink: a square
+# around the ink plus FIT_MARGIN on every side, never zoomed in more than MAX_ZOOM. Line and glyph
+# icons keep the standard UI padding.
+FIT_KINDS = {"solid", "sketch"}
+FIT_MARGIN = 1.0
+MAX_ZOOM = 1.5
 
 
 def render(entry):
@@ -51,6 +59,40 @@ def validate(entry, svg):
 def dark(svg):
     # One pass, so a dark colour equal to a later light colour is not replaced again.
     return re.sub(r"#[0-9a-f]{6}\b", lambda m: common.DARK_PALETTE.get(m.group(0), m.group(0)), svg)
+
+
+def ink_bounds(entries):
+    """{name: (x0, y0, x1, y1)} of the rendered ink, via examples/bbox.rs."""
+    with tempfile.TemporaryDirectory() as tmp:
+        files = []
+        for e in entries:
+            path = os.path.join(tmp, f"{e['name']}.svg")
+            with open(path, "w") as fh:
+                fh.write(e["svg"])
+            files.append(path)
+        run = subprocess.run(["cargo", "run", "--release", "-q", "--example", "bbox", "--", *files],
+                             cwd=ROOT, capture_output=True, text=True)
+        if run.returncode != 0:
+            sys.exit(f"bbox failed:\n{run.stderr}")
+    out = {}
+    for line in run.stdout.splitlines():
+        name, *nums = line.split()
+        out[name] = tuple(map(float, nums))
+    return out
+
+
+def fit(entries):
+    """Zooms each fitted icon's view box to its ink."""
+    fitted = [e for e in entries if e["kind"] in FIT_KINDS]
+    if not fitted:
+        return
+    bounds = ink_bounds(fitted)
+    for e in fitted:
+        x0, y0, x1, y1 = bounds[e["name"]]
+        side = min(24.0, max(max(x1 - x0, y1 - y0) + 2 * FIT_MARGIN, 24.0 / MAX_ZOOM))
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        vb = f"{common.f(cx - side / 2)} {common.f(cy - side / 2)} {common.f(side)} {common.f(side)}"
+        e["svg"] = e["svg"].replace('viewBox="0 0 24 24"', f'viewBox="{vb}"', 1)
 
 
 def write(out, entries):
@@ -114,6 +156,7 @@ def main():
         print("\n".join(problems), file=sys.stderr)
         sys.exit(1)
 
+    fit(entries)
     out = args.out or os.path.join(ROOT, "icons")
     if not args.only:
         # A full run owns icons/: remove files for icons that no longer exist.

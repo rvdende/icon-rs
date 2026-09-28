@@ -282,7 +282,7 @@ mod tests {
         for icon in ALL {
             for svg in [icon.svg, icon.svg_dark] {
                 assert!(svg.starts_with("<svg"), "{} is not an svg", icon.name);
-                assert!(svg.contains(r#"viewBox="0 0 24 24""#), "{} is not 24x24", icon.name);
+                assert!(svg.contains(r#"width="24" height="24""#), "{} is not 24x24", icon.name);
             }
         }
     }

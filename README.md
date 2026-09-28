@@ -49,6 +49,7 @@ Colours convert through sRGB; alpha is dropped, since icons are opaque.
 - `tools/icons/`: the generator. `common.py` holds the palette, conventions and geometry helpers;
   each family is one module (`part`, `assembly`, `sketch`, `glyphs`, `ui_a`, `ui_b`).
   `python3 tools/icons/gen.py` validates every icon and rewrites `icons/` and `src/generated.rs`.
+- `examples/bbox.rs`: ink bounds of SVGs; `gen.py` uses it to fit solid and sketch icons to their box.
 - `cargo run --release --example sheet -- OUT.png icons [NAME...]`: a labelled review sheet at
   96, 24 and 16 px in both themes.
 - `tools/build_site.py`: builds the icon browser into `site/`; GitHub Actions deploys it on every push to `main`.
