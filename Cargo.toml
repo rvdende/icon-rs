@@ -1,6 +1,6 @@
 [package]
 name = "icon-rs"
-version = "0.3.6"
+version = "0.3.7"
 edition = "2024"
 description = "SVG icons for CAD apps: isometric features and mates, sketch tools, constraint glyphs and UI icons"
 license = "MIT OR Apache-2.0"
@@ -10,7 +10,7 @@ documentation = "https://docs.rs/icon-rs"
 readme = "README.md"
 keywords = ["icons", "svg", "cad", "ui"]
 categories = ["gui", "graphics"]
-exclude = ["/.github", "/site", "/tools/build_site.py"]
+exclude = ["/.github", "/assets", "/site", "/tools/build_site.py"]
 
 [lib]
 name = "icon_rs"

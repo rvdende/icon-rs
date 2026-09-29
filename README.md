@@ -1,5 +1,7 @@
 # icon-rs
 
+![icon-rs icons in light and dark themes, each with a different accent colour](https://raw.githubusercontent.com/rvdende/icon-rs/main/assets/splash.png)
+
 SVG icons for CAD apps, embedded as Rust constants. Four kinds, drawn procedurally so the set
 stays consistent:
 
@@ -53,4 +55,5 @@ Colours convert through sRGB; alpha is dropped, since icons are opaque.
 - `cargo run --release --example sheet -- OUT.png icons [NAME...]`: a labelled review sheet at
   96, 24 and 16 px in both themes.
 - `tools/build_site.py`: builds the icon browser into `site/`; GitHub Actions deploys it on every push to `main`.
+- `cargo run --example splash assets/splash.png`: the banner above, with the accent swept around the colour wheel.
 - `cargo run --example preview [out.png] [scale]`: renders a contact sheet (default `target/preview.png`).
