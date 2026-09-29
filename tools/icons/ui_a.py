@@ -554,6 +554,15 @@ def upload():
     ]
 
 
+@icon("download", "line", "Download")
+def download():
+    # The upload tray with the arrow turned round: down into the tray.
+    return [
+        path("M4 15 V17.5 A2.5 2.5 0 0 0 6.5 20 H17.5 A2.5 2.5 0 0 0 20 17.5 V15"),
+        *_acc(_arrow(12, 4, 12, 15.5)),
+    ]
+
+
 # ---------------------------------------------------------------------------------------------
 # Flip direction: a bold diagonal arrow with a filled head (an allowed exception; it sits in a
 # small ghost button). The two icons are exact 180-degree rotations about 12,12.

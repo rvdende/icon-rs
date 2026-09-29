@@ -72,6 +72,47 @@ def file_new():
     return _doc() + [_acc(_plus(12, 14))]
 
 
+@icon("sync-document", "line", "Sync document")
+def sync_document():
+    # A document with a two-arrow sync ring over its lower right corner (the document edge is
+    # cut back where the ring passes).
+    ring_a = arc_points(15.5, 15.5, 5, 5, 200, 340, 10)
+    ring_b = arc_points(15.5, 15.5, 5, 5, 20, 160, 10)
+    return _doc(4, 17, 2.5, 20.5, gap_right=(9.25, 20.5)) + [
+        *_acc([polyline(ring_a), _head_at(ring_a[-1], ring_a[-2]), polyline(ring_b), _head_at(ring_b[-1], ring_b[-2])]),
+    ]
+
+
+def _head_at(tip, frm, s=2.25):
+    dx, dy = tip[0] - frm[0], tip[1] - frm[1]
+    L = math.hypot(dx, dy) or 1
+    ux, uy = dx / L, dy / L
+    nx, ny = -uy, ux
+    return polyline([(tip[0] - s * ux + s * nx, tip[1] - s * uy + s * ny), tip, (tip[0] - s * ux - s * nx, tip[1] - s * uy - s * ny)])
+
+
+@icon("board", "line", "Board")
+def board():
+    # A printed circuit board: a rounded outline with a mounting hole in two corners and a chip
+    # footprint with traces (the accent).
+    return [
+        rect(3, 5, 18, 14, R),
+        circle(6, 8, 1),
+        circle(18, 16, 1),
+        _acc(path("M9.5 10 H14.5 V14 H9.5 Z M14.5 12 H18 M6 16 H9.5")),
+    ]
+
+
+@icon("create-assembly", "line", "Create assembly")
+def create_assembly():
+    # Two stacked parts on a base plate, with a plus: make an assembly.
+    return [
+        path("M3 17.5 L12 21 L21 17.5"),
+        path("M5 12.5 L10 10.5 L15 12.5 L10 14.5 Z M5 12.5 V15 L10 17 L15 15 V12.5 M10 14.5 V17"),
+        _acc(_plus(17.5, 6.5)),
+    ]
+
+
 @icon("file-import", "line", "Import")
 def file_import():
     return _doc(7, 21, gap_left=(10.5, 17.5)) + _acc(_arrow(2.5, 14, 13, 14))
