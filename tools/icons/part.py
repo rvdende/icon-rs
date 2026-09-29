@@ -375,6 +375,22 @@ def transform():
     ]
 
 
+@icon("composite-part", "solid", "Composite part")
+def composite_part():
+    # Context: a plate with two blocks on it, kept as they are. Output: the one part they make
+    # (a dashed accent outline round all three, the silhouette of their bounding box).
+    o = (11.6, 5.2)
+    P = projector(o)
+    x0, x1, y0, y1, z0, z1 = -1.2, 11.2, -1.2, 9.2, -1.0, 6.4
+    sil = [P(x0, y0, z1), P(x1, y0, z1), P(x1, y0, z0), P(x1, y1, z0), P(x0, y1, z0), P(x0, y1, z1)]
+    return [
+        box(o, 0, 10, 0, 8, 0, 1.4),
+        box(o, 1.2, 4.4, 1.0, 4.0, 1.4, 5.2),
+        box(o, 5.4, 8.4, 4.0, 6.8, 1.4, 3.6),
+        poly(sil, None, f'stroke="{ACCENT}" ' + dash(1.1)),
+    ]
+
+
 @icon("plane", "solid", "Plane")
 def plane():
     # Context: a reference face. Output: the new plane offset above it (dashed, faint).

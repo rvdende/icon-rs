@@ -19,6 +19,7 @@ icons! {
     BOOLEAN => ("boolean", Solid, "Boolean"),
     SPLIT => ("split", Solid, "Split"),
     TRANSFORM => ("transform", Solid, "Transform"),
+    COMPOSITE_PART => ("composite-part", Solid, "Composite part"),
     PLANE => ("plane", Solid, "Plane"),
     MATE_CONNECTOR => ("mate-connector", Solid, "Mate connector"),
     CUSTOM_FEATURE => ("custom-feature", Solid, "Add custom feature"),
