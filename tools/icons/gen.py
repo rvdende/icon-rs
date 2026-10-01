@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 import common  # noqa: E402
 
 # Toolbar order: modules in this order, icons in each module in definition order.
-MODULES = ["part", "assembly", "sketch", "glyphs", "ui_a", "ui_b"]
+MODULES = ["part", "sheet_metal", "assembly", "sketch", "glyphs", "ui_a", "ui_b"]
 RUST_KIND = {"solid": "Solid", "sketch": "Sketch", "glyph": "Glyph", "line": "Line"}
 
 # Solid and sketch icons are drawn on the shared 24-unit grid but rarely fill it, which makes them
