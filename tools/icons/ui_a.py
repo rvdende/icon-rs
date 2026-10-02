@@ -484,6 +484,20 @@ def warning_filled():
     return _knockout(_d(tri), [_stem(12, 9.5, 14.25), _circle_d(12, 17.25, 1.15)])
 
 
+# A block arrow pointing left: a feature or instance defined in the context of an assembly.
+_IN_CONTEXT = [(3.5, 12), (11, 4.5), (11, 9), (20.5, 9), (20.5, 15), (11, 15), (11, 19.5)]
+
+
+@icon("in-context", "line", "In context (primary)")
+def in_context():
+    return poly(_IN_CONTEXT, INK)
+
+
+@icon("in-context-secondary", "line", "In context (secondary)")
+def in_context_secondary():
+    return poly(_IN_CONTEXT, None, 'stroke-dasharray="2.2 1.6"')
+
+
 # ---------------------------------------------------------------------------------------------
 # Places and sharing
 

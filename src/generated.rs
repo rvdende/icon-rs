@@ -180,6 +180,8 @@ icons! {
     HELP_FILLED => ("help-filled", Line, "Help (filled)"),
     ERROR_FILLED => ("error-filled", Line, "Error"),
     WARNING_FILLED => ("warning-filled", Line, "Warning"),
+    IN_CONTEXT => ("in-context", Line, "In context (primary)"),
+    IN_CONTEXT_SECONDARY => ("in-context-secondary", Line, "In context (secondary)"),
     HOME => ("home", Line, "Home"),
     NOTIFICATIONS => ("notifications", Line, "Notifications"),
     SETTINGS => ("settings", Line, "Settings"),
