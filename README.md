@@ -49,7 +49,8 @@ Colours convert through sRGB; alpha is dropped, since icons are opaque.
 
 - `icons/*.svg`, `icons/dark/*.svg`: 24x24, generated; don't edit by hand.
 - `tools/icons/`: the generator. `common.py` holds the palette, conventions and geometry helpers;
-  each family is one module (`part`, `assembly`, `sketch`, `glyphs`, `ui_a`, `ui_b`).
+  each family is one module (`part`, `sheet_metal`, `assembly`, `sketch`, `glyphs`, `ui_a`, `ui_b`,
+  `eda` for schematic and PCB layout).
   `python3 tools/icons/gen.py` validates every icon and rewrites `icons/` and `src/generated.rs`.
 - `examples/bbox.rs`: ink bounds of SVGs; `gen.py` uses it to fit solid and sketch icons to their box.
 - `cargo run --release --example sheet -- OUT.png icons [NAME...]`: a labelled review sheet at
