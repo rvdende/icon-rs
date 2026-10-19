@@ -22,7 +22,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 tools/build_site.py
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo xtask site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

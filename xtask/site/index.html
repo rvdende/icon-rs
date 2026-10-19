@@ -1,63 +1,4 @@
-"""Builds the GitHub Pages site into site/. Run from anywhere: python3 tools/build_site.py
-
-Everything the page knows comes from the crate: the icon list, order and constant names from the
-icons! macro in src/lib.rs, the LIGHT and DARK palettes and the Palette::new tint factors from the
-same file, and the SVG sources from icons/. The page recolours icons in the browser with a port
-of Icon::recolor and Palette::new.
-"""
-import html, json, os, re, shutil
-
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-OUT = os.path.join(ROOT, "site")
-
-lib = open(os.path.join(ROOT, "src", "lib.rs")).read()
-cargo = open(os.path.join(ROOT, "Cargo.toml")).read()
-crate = re.search(r'^name\s*=\s*"([^"]+)"', cargo, re.M).group(1)
-version = re.search(r'^version\s*=\s*"([^"]+)"', cargo, re.M).group(1)
-dep_version = version if version.startswith("0.0.") else ".".join(version.split(".")[:2])
-
-
-def palette(name):
-    body = re.search(rf"pub const {name}: Palette = Palette \{{(.*?)\}};", lib, re.S).group(1)
-    return {slot: "#" + r + g + b for slot, r, g, b in
-            re.findall(r"(\w+): Rgb\(0x(\w\w), 0x(\w\w), 0x(\w\w)\)", body)}
-
-
-tints = re.search(r"\(Rgb::BLACK, \[(\d+), (\d+), (\d+), (\d+)\]\)\s*\} else \{\s*\(Rgb::WHITE, \[(\d+), (\d+), (\d+), (\d+)\]\)", lib).groups()
-tints = {"dark": list(map(int, tints[:4])), "light": list(map(int, tints[4:]))}
-generated = open(os.path.join(ROOT, "src", "generated.rs")).read()
-icons = [
-    {"konst": k, "name": n, "kind": kind, "title": t.replace('\\"', '"'),
-     "svg": open(os.path.join(ROOT, "icons", f"{n}.svg")).read()}
-    for k, n, kind, t in re.findall(r'(\w+) => \("([\w-]+)", (\w+), "((?:[^"\\]|\\.)*)"\)', generated)
-]
-KIND_TITLES = [("Solid", "Features and assembly"), ("Sketch", "Sketch"),
-               ("Glyph", "Constraints and markers"), ("Line", "Interface")]
-
-shutil.rmtree(OUT, ignore_errors=True)
-os.makedirs(os.path.join(OUT, "icons", "dark"))
-for icon in icons:
-    for sub in ("", "dark"):
-        shutil.copy(os.path.join(ROOT, "icons", sub, f"{icon['name']}.svg"), os.path.join(OUT, "icons", sub))
-open(os.path.join(OUT, ".nojekyll"), "w").close()
-
-def tile(i):
-    return (f'      <button class="tile" data-name="{html.escape(i["name"])}" '
-            f'data-search="{html.escape((i["name"] + " " + i["title"]).lower())}" title="{html.escape(i["title"])}">'
-            f'<img alt="" width="85" height="85"><span>{html.escape(i["name"])}</span></button>')
-
-
-groups = []
-for kind, heading in KIND_TITLES:
-    members = [i for i in icons if i["kind"] == kind]
-    if members:
-        groups.append(f'    <div class="group" data-kind="{kind}">\n'
-                      f'    <h2>{heading} <small>{len(members)}</small></h2>\n'
-                      f'    <section class="grid" aria-label="{heading}">\n'
-                      + "\n".join(tile(i) for i in members) + "\n    </section>\n    </div>")
-tiles = "\n".join(groups)
-
-page = r"""<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -510,13 +451,16 @@ $("find").addEventListener("input", e => {
   const q = e.target.value.trim().toLowerCase();
   let any = false;
   document.querySelectorAll(".group").forEach(g => {
+    const tiles = g.querySelectorAll(".tile");
     let shown = 0;
-    g.querySelectorAll(".tile").forEach(t => {
+    tiles.forEach(t => {
       const hit = !q || t.dataset.search.includes(q);
       t.hidden = !hit;
       shown += hit;
     });
     g.hidden = !shown;
+    // The heading's count: the matches out of the group while filtering, else the group's size.
+    g.querySelector("h2 small").textContent = q ? `${shown} of ${tiles.length}` : tiles.length;
     any ||= shown > 0;
   });
   $("empty").hidden = any;
@@ -527,16 +471,3 @@ if (location.hash) open(decodeURIComponent(location.hash.slice(1)));
 </script>
 </body>
 </html>
-"""
-
-page = (page.replace("__TILES__", tiles)
-            .replace("__ICONS__", json.dumps(icons).replace("</", "<\\/"))
-            .replace("__PALETTES__", json.dumps({"light": palette("LIGHT"), "dark": palette("DARK")}))
-            .replace("__TINTS__", json.dumps(tints))
-            .replace("__COUNT__", str(len(icons)))
-            .replace("__VERSION__", version)
-            .replace("__DEP_VERSION__", dep_version)
-            .replace("__CRATE__", crate))
-with open(os.path.join(OUT, "index.html"), "w") as f:
-    f.write(page)
-print(f"site/ built with {len(icons)} icons")

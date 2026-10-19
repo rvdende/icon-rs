@@ -35,7 +35,7 @@ let white: String = UNDO.tinted(Rgb::WHITE);
 Enable the `bevy_color` feature to pass Bevy colours straight in and get them back out:
 
 ```toml
-icon-rs = { version = "0.2", features = ["bevy_color"] }
+icon-rs = { version = "0.4", features = ["bevy_color"] }
 ```
 
 ```rust
@@ -47,14 +47,36 @@ let mid: Color = palette.mid.into();
 
 Colours convert through sRGB; alpha is dropped, since icons are opaque.
 
+## Development
+
+The icons are drawn in Rust by the generator in `xtask/`, a workspace crate that is not published.
+
 - `icons/*.svg`, `icons/dark/*.svg`: 24x24, generated; don't edit by hand.
-- `tools/icons/`: the generator. `common.py` holds the palette, conventions and geometry helpers;
-  each family is one module (`part`, `sheet_metal`, `assembly`, `sketch`, `glyphs`, `ui_a`, `ui_b`,
-  `eda` for schematic and PCB layout).
-  `python3 tools/icons/gen.py` validates every icon and rewrites `icons/` and `src/generated.rs`.
-- `examples/bbox.rs`: ink bounds of SVGs; `gen.py` uses it to fit solid and sketch icons to their box.
+- `xtask/src/common.rs`: the palette, the drawing conventions for each kind, and the SVG and
+  geometry helpers. `src/palette.rs` holds the crate's `Rgb` and `Palette`; the generator includes
+  it too, and a test keeps the two palettes in step.
+- `xtask/src/icons/`: one module per family (`part`, `sheet_metal`, `assembly`, `sketch`, `glyphs`,
+  `ui_a`, `ui_b`, `eda` for schematic and PCB layout). Each icon is a function returning its SVG
+  elements, listed in the module's `icons()` in toolbar order.
+
+```sh
+cargo xtask gen                          # validate, fit and rewrite icons/ and src/generated.rs
+cargo xtask gen --check                  # fail if those are out of date (CI runs this)
+cargo xtask gen --only sketch --out DIR  # render one module into DIR for review
+cargo xtask site                         # build the icon browser into site/
+```
+
+`gen` checks every icon (kebab-case name, colours allowed for its kind, well-formed XML, no ids),
+zooms solid and sketch icons to their ink, and writes each light SVG with its dark variant.
+GitHub Actions builds the site and deploys it on every push to `main`.
+
+To add an icon, write its function in the right module, add it to that module's `icons()`, and run
+`cargo xtask gen`. [HOWTO.md](HOWTO.md) walks through it with examples.
+
+Review and promo images:
+
 - `cargo run --release --example sheet -- OUT.png icons [NAME...]`: a labelled review sheet at
-  96, 24 and 16 px in both themes.
-- `tools/build_site.py`: builds the icon browser into `site/`; GitHub Actions deploys it on every push to `main`.
+  96, 24 and 16 px in both themes. Pass the `--out` directory of a `--only` run in place of `icons`
+  to review a module before regenerating.
 - `cargo run --example splash assets/splash.png`: the banner above, with the accent swept around the colour wheel.
 - `cargo run --example preview [out.png] [scale]`: renders a contact sheet (default `target/preview.png`).

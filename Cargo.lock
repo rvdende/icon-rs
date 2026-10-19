@@ -471,7 +471,7 @@ checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "icon-rs"
-version = "0.3.13"
+version = "0.4.0"
 dependencies = [
  "bevy_color",
  "resvg",
@@ -1224,6 +1224,13 @@ name = "xmlwriter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec7a2a501ed189703dba8b08142f057e887dfc4b2cc4db2d343ac6376ba3e0b9"
+
+[[package]]
+name = "xtask"
+version = "0.0.0"
+dependencies = [
+ "resvg",
+]
 
 [[package]]
 name = "zlib-rs"
