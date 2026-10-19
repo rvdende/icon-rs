@@ -414,6 +414,56 @@ def play():
     return [poly([(7.5, 5.5), (18.75, 12), (7.5, 18.5)], INK)]
 
 
+@icon("skip-back", "line", "Skip back")
+def skip_back():
+    # Play's triangle turned to face left, against a bar: the bar is the start of the track.
+    return [line(6, 5.5, 6, 18.5), poly([(18, 5.5), (9.5, 12), (18, 18.5)], INK)]
+
+
+@icon("skip-forward", "line", "Skip forward")
+def skip_forward():
+    return [line(18, 5.5, 18, 18.5), poly([(6, 5.5), (14.5, 12), (6, 18.5)], INK)]
+
+
+@icon("repeat", "line", "Repeat")
+def repeat():
+    # Two arrows chasing each other round a loop, each turning a rounded corner.
+    return [
+        path("M4 13 V10.5 A3.5 3.5 0 0 1 7.5 7 H19"),
+        path("M20 11 V13.5 A3.5 3.5 0 0 1 16.5 17 H5"),
+        _acc(_head((19, 7), (14, 7), 3)),
+        _acc(_head((5, 17), (10, 17), 3)),
+    ]
+
+
+def _speaker():
+    return poly([(3.5, 9.5), (7.5, 9.5), (12.5, 5), (12.5, 19), (7.5, 14.5), (3.5, 14.5)])
+
+
+@icon("volume", "line", "Volume")
+def volume():
+    return [
+        _speaker(),
+        _acc(path("M16 9.5 A3.5 3.5 0 0 1 16 14.5")),
+        _acc(path("M18.75 6.75 A7.5 7.5 0 0 1 18.75 17.25")),
+    ]
+
+
+@icon("volume-mute", "line", "Mute")
+def volume_mute():
+    return [_speaker(), _acc(line(16, 9.5, 21, 14.5)), _acc(line(21, 9.5, 16, 14.5))]
+
+
+@icon("music", "line", "Music")
+def music():
+    # Two beamed quavers: the note heads are filled, the beam carries the accent.
+    return [
+        line(9.5, 17.5, 9.5, 6.5), line(19.5, 15.5, 19.5, 4.5),
+        circle(7.25, 17.5, 2.25, INK), circle(17.25, 15.5, 2.25, INK),
+        _acc(line(9.5, 6.5, 19.5, 4.5)),
+    ]
+
+
 @icon("visible", "line", "Visible")
 def visible():
     return [path(_d(_eye_pts())), _acc(circle(12, 12, 3))]
