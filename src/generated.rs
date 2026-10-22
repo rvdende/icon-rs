@@ -196,6 +196,9 @@ icons! {
     CLOUD_UPLOAD => ("cloud-upload", Line, "Upload to cloud"),
     UPLOAD => ("upload", Line, "Upload"),
     DOWNLOAD => ("download", Line, "Download"),
+    THEME_LIGHT => ("theme-light", Line, "Light theme"),
+    THEME_DARK => ("theme-dark", Line, "Dark theme"),
+    THEME_SYSTEM => ("theme-system", Line, "System theme"),
     FLIP_DIRECTION => ("flip-direction", Line, "Flip direction"),
     FLIP_DIRECTION_UP => ("flip-direction-up", Line, "Flip direction (flipped)"),
     FILE => ("file", Line, "File"),
@@ -224,6 +227,7 @@ icons! {
     BRANCHES => ("branches", Line, "Branches"),
     VERSIONS => ("versions", Line, "Versions"),
     LIKES => ("likes", Line, "Likes"),
+    HEART => ("heart", Line, "Heart"),
     USER => ("user", Line, "User"),
     USERS => ("users", Line, "Teams"),
     OWNED_BY_ME => ("owned-by-me", Line, "Owned by me"),
@@ -284,4 +288,5 @@ icons! {
     PLATFORM_LINUX => ("platform-linux", Line, "Linux"),
     PLATFORM_ANDROID => ("platform-android", Line, "Android"),
     PLATFORM_IOS => ("platform-ios", Line, "iPhone"),
+    GITHUB => ("github", Line, "GitHub"),
 }

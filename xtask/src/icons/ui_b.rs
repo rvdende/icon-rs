@@ -39,6 +39,7 @@ pub fn icons() -> Vec<Def> {
         def("branches", Line, "Branches", branches),
         def("versions", Line, "Versions", versions),
         def("likes", Line, "Likes", likes),
+        def("heart", Line, "Heart", heart),
         def("user", Line, "User", user),
         def("users", Line, "Teams", users),
         def("owned-by-me", Line, "Owned by me", owned_by_me),
@@ -332,6 +333,13 @@ fn branches() -> Vec<String> {
 
 fn versions() -> Vec<String> {
     els![rect(10.0, 3.5, 11.0, 17.0, R, "", ""), acc(path("M6.5 6 V18 M3 8.5 V15.5", "", ""))]
+}
+
+fn heart() -> Vec<String> {
+    // A solid heart (sponsor, favourite).
+    let d = "M12 20.4 C7.1 17 3.25 13.8 3.25 9.5 C3.25 6.7 5.4 4.55 8.1 4.55 C9.65 4.55 11.05 5.3 12 6.55 \
+             C12.95 5.3 14.35 4.55 15.9 4.55 C18.6 4.55 20.75 6.7 20.75 9.5 C20.75 13.8 16.9 17 12 20.4 Z";
+    els![path(d, INK, r#"stroke="none""#)]
 }
 
 fn likes() -> Vec<String> {

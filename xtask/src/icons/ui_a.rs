@@ -74,6 +74,9 @@ pub fn icons() -> Vec<Def> {
         def("cloud-upload", Line, "Upload to cloud", cloud_upload),
         def("upload", Line, "Upload", upload),
         def("download", Line, "Download", download),
+        def("theme-light", Line, "Light theme", theme_light),
+        def("theme-dark", Line, "Dark theme", theme_dark),
+        def("theme-system", Line, "System theme", theme_system),
         def("flip-direction", Line, "Flip direction", flip_direction),
         def("flip-direction-up", Line, "Flip direction (flipped)", flip_direction_up),
     ]
@@ -675,4 +678,30 @@ fn flip_direction() -> Vec<String> {
 
 fn flip_direction_up() -> Vec<String> {
     flip(-1.0)
+}
+
+fn theme_light() -> Vec<String> {
+    // A sun: a solid disc and eight rays.
+    let rays: Vec<String> = (0..8)
+        .map(|i| {
+            let a = f64::from(i) * PI / 4.0;
+            let (c, s) = (a.cos(), a.sin());
+            format!("M{} {} L{} {}", f(12.0 + 6.75 * c), f(12.0 + 6.75 * s), f(12.0 + 9.0 * c), f(12.0 + 9.0 * s))
+        })
+        .collect();
+    els![circle(12.0, 12.0, 4.25, INK, r#"stroke="none""#), path(&rays.join(" "), "", "")]
+}
+
+fn theme_dark() -> Vec<String> {
+    // A solid crescent moon.
+    els![path("M20.6 14.6 A8.9 8.9 0 1 1 9.4 3.4 A7 7 0 0 0 20.6 14.6 Z", INK, r#"stroke="none""#)]
+}
+
+fn theme_system() -> Vec<String> {
+    // A monitor whose screen is half light, half dark: follow the system.
+    els![
+        rect(2.5, 3.5, 19.0, 13.0, 2.5, "", ""),
+        path("M12 6 H17.5 A1.5 1.5 0 0 1 19 7.5 V12.5 A1.5 1.5 0 0 1 17.5 14 H12 Z", INK, r#"stroke="none""#),
+        path("M12 16.5 V20.5 M8 20.5 H16", "", ""),
+    ]
 }

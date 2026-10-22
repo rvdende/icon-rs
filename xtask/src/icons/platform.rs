@@ -1,4 +1,4 @@
-//! Operating systems and devices, for download buttons and platform lists (kind Line).
+//! Operating systems, devices and code hosting, for download buttons and platform lists (kind Line).
 //!
 //! Solid marks: filled INK shapes, with details such as eyes and the beak cut out with
 //! `fill-rule="evenodd"` (as the filled glyphs in ui_a), so they tint as one colour. Simplified
@@ -15,6 +15,7 @@ pub fn icons() -> Vec<Def> {
         def("platform-linux", Line, "Linux", linux),
         def("platform-android", Line, "Android", android),
         def("platform-ios", Line, "iPhone", ios),
+        def("github", Line, "GitHub", github),
     ]
 }
 
@@ -98,4 +99,14 @@ fn ios() -> Vec<String> {
     // A solid phone with the camera pill cut out at the top of its screen.
     let phone = format!("{} {}", rounded(6.0, 2.0, 12.0, 20.0, 2.75), rounded(10.0, 4.25, 4.0, 1.5, 0.75));
     els![path(&phone, INK, SOLID_CUT)]
+}
+
+fn github() -> Vec<String> {
+    // A disc with a cat cut out of it: head and ears, neck down to the rim, and a curled tail.
+    let disc = oval(12.0, 12.0, 9.5, 9.5);
+    let cat = "M10 21.2 V18.2 C7.4 17.7 6.2 16.2 6.2 13.3 C6.2 12 6.6 11 7.3 10.2 C7.1 9.4 7.1 8.3 7.5 7.2 \
+               C8.6 7.2 9.6 7.8 10.3 8.3 C11.4 8 12.6 8 13.7 8.3 C14.4 7.8 15.4 7.2 16.5 7.2 \
+               C16.9 8.3 16.9 9.4 16.7 10.2 C17.4 11 17.8 12 17.8 13.3 C17.8 16.2 16.6 17.7 14 18.2 V21.2 Z";
+    let tail = "M10 20.2 C8.4 20.6 7.3 19.9 6.6 18.6 L7.4 18.2 C7.9 19.1 8.7 19.6 10 19.3 Z";
+    els![path(&format!("{disc} {cat} {tail}"), INK, SOLID_CUT)]
 }
