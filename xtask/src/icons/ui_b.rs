@@ -10,6 +10,7 @@
 
 use crate::common::*;
 use Kind::Line;
+use std::f64::consts::PI;
 
 pub fn icons() -> Vec<Def> {
     vec![
@@ -40,6 +41,7 @@ pub fn icons() -> Vec<Def> {
         def("versions", Line, "Versions", versions),
         def("likes", Line, "Likes", likes),
         def("heart", Line, "Heart", heart),
+        def("star", Line, "Star", star),
         def("user", Line, "User", user),
         def("users", Line, "Teams", users),
         def("owned-by-me", Line, "Owned by me", owned_by_me),
@@ -340,6 +342,19 @@ fn heart() -> Vec<String> {
     let d = "M12 20.4 C7.1 17 3.25 13.8 3.25 9.5 C3.25 6.7 5.4 4.55 8.1 4.55 C9.65 4.55 11.05 5.3 12 6.55 \
              C12.95 5.3 14.35 4.55 15.9 4.55 C18.6 4.55 20.75 6.7 20.75 9.5 C20.75 13.8 16.9 17 12 20.4 Z";
     els![path(d, INK, r#"stroke="none""#)]
+}
+
+fn star() -> Vec<String> {
+    // A solid five-pointed star (stars, favourites), its points rounded by the root stroke.
+    let (cx, cy) = (12.0, 12.6);
+    let points: Vec<(f64, f64)> = (0..10)
+        .map(|i| {
+            let r = if i % 2 == 0 { 8.6 } else { 3.7 };
+            let a = -PI / 2.0 + f64::from(i) * PI / 5.0;
+            (cx + r * a.cos(), cy + r * a.sin())
+        })
+        .collect();
+    els![poly(&points, INK, "")]
 }
 
 fn likes() -> Vec<String> {

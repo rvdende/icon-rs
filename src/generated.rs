@@ -228,6 +228,7 @@ icons! {
     VERSIONS => ("versions", Line, "Versions"),
     LIKES => ("likes", Line, "Likes"),
     HEART => ("heart", Line, "Heart"),
+    STAR => ("star", Line, "Star"),
     USER => ("user", Line, "User"),
     USERS => ("users", Line, "Teams"),
     OWNED_BY_ME => ("owned-by-me", Line, "Owned by me"),
