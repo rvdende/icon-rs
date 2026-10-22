@@ -27,6 +27,7 @@ pub const MODULES: &[Module] = &[
     ("ui_a", icons::ui_a::icons),
     ("ui_b", icons::ui_b::icons),
     ("eda", icons::eda::icons),
+    ("platform", icons::platform::icons),
 ];
 
 // Solid and sketch icons are drawn on the shared 24-unit grid but rarely fill it, which makes them

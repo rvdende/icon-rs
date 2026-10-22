@@ -76,6 +76,13 @@ impl Icon {
         self.recolor(&Palette { ink: color.into(), accent: accent.into(), ..Palette::LIGHT })
     }
 
+    /// The light SVG with its ink set to `currentColor`, for HTML: the icon then takes the CSS
+    /// `color` of the element it sits in, in any theme. Any accent detail keeps the light accent.
+    /// Meant for [`Kind::is_tintable`] icons.
+    pub fn current_color(&self) -> String {
+        self.svg.replace(&Palette::LIGHT.ink.to_hex(), "currentColor")
+    }
+
     /// Whether the icon has any accent-coloured detail. Apps that tint by multiplying a
     /// single-colour raster need a second layer (or a pre-coloured raster) for these.
     pub fn has_accent(&self) -> bool {
@@ -229,6 +236,14 @@ mod tests {
             let allowed = white.matches("=\"#ffffff").count() + white.matches(&format!("=\"{accent}")).count();
             assert_eq!(colours, allowed, "{} uses a colour other than ink and accent", icon.name);
         }
+    }
+
+    #[test]
+    fn current_color_paints_only_the_ink() {
+        let svg = UNDO.current_color();
+        assert!(svg.contains(r#"stroke="currentColor""#));
+        assert!(!svg.contains(&Palette::LIGHT.ink.to_hex()));
+        assert!(svg.contains(&Palette::LIGHT.accent.to_hex()));
     }
 
     #[test]

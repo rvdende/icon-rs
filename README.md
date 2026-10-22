@@ -28,6 +28,9 @@ let custom: String = EXTRUDE.recolor(&palette);
 // Glyph and line icons are ink plus a little accent: paint the ink any colour.
 assert!(UNDO.kind.is_tintable());
 let white: String = UNDO.tinted(Rgb::WHITE);
+
+// In HTML, let CSS colour the ink.
+let html: String = UNDO.current_color();
 ```
 
 ### Bevy
@@ -56,7 +59,7 @@ The icons are drawn in Rust by the generator in `xtask/`, a workspace crate that
   geometry helpers. `src/palette.rs` holds the crate's `Rgb` and `Palette`; the generator includes
   it too, and a test keeps the two palettes in step.
 - `xtask/src/icons/`: one module per family (`part`, `sheet_metal`, `assembly`, `sketch`, `glyphs`,
-  `ui_a`, `ui_b`, `eda` for schematic and PCB layout). Each icon is a function returning its SVG
+  `ui_a`, `ui_b`, `eda` for schematic and PCB layout, `platform` for operating systems). Each icon is a function returning its SVG
   elements, listed in the module's `icons()` in toolbar order.
 
 ```sh

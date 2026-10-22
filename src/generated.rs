@@ -279,4 +279,9 @@ icons! {
     PLOT_GERBERS => ("plot-gerbers", Line, "Plot fabrication outputs"),
     DRILL_FILE => ("drill-file", Line, "Drill file"),
     BOARD_3D => ("board-3d", Solid, "3D board view"),
+    PLATFORM_WINDOWS => ("platform-windows", Line, "Windows"),
+    PLATFORM_MACOS => ("platform-macos", Line, "macOS"),
+    PLATFORM_LINUX => ("platform-linux", Line, "Linux"),
+    PLATFORM_ANDROID => ("platform-android", Line, "Android"),
+    PLATFORM_IOS => ("platform-ios", Line, "iPhone"),
 }
