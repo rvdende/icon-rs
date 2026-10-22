@@ -1,8 +1,9 @@
 //! Operating systems and devices, for download buttons and platform lists (kind Line).
 //!
-//! Simplified marks drawn on the line grid, not the vendors' artwork: each is one plain object, so
-//! all stay INK only. Eyes and similar dots are zero-length round-capped strokes (`M x y h.01`),
-//! as the keys of `keyboard` in ui_b.
+//! Solid marks: filled INK shapes, with details such as eyes and the beak cut out with
+//! `fill-rule="evenodd"` (as the filled glyphs in ui_a), so they tint as one colour. Simplified
+//! marks drawn on the grid, not the vendors' artwork: each is one plain object, so all stay INK
+//! only.
 
 use crate::common::*;
 use Kind::Line;
@@ -17,15 +18,31 @@ pub fn icons() -> Vec<Def> {
     ]
 }
 
+const SOLID: &str = r#"stroke="none""#;
+const SOLID_CUT: &str = r#"fill-rule="evenodd" stroke="none""#;
+
+/// An ellipse as a closed subpath, for cutting holes with evenodd.
+fn oval(cx: f64, cy: f64, rx: f64, ry: f64) -> String {
+    let (left, right) = (f(cx - rx), f(cx + rx));
+    let (rx, ry, cy) = (f(rx), f(ry), f(cy));
+    format!("M{left} {cy} A{rx} {ry} 0 1 0 {right} {cy} A{rx} {ry} 0 1 0 {left} {cy} Z")
+}
+
+/// A rounded rectangle as a closed subpath.
+fn rounded(x: f64, y: f64, w: f64, h: f64, r: f64) -> String {
+    let (x0, x1, y0, y1) = (f(x), f(x + w), f(y), f(y + h));
+    let (xa, xb, ya, yb) = (f(x + r), f(x + w - r), f(y + r), f(y + h - r));
+    let r = f(r);
+    format!(
+        "M{xa} {y0} H{xb} A{r} {r} 0 0 1 {x1} {ya} V{yb} A{r} {r} 0 0 1 {xb} {y1} \
+         H{xa} A{r} {r} 0 0 1 {x0} {yb} V{ya} A{r} {r} 0 0 1 {xa} {y0} Z"
+    )
+}
+
 fn windows() -> Vec<String> {
     // Four panes with a gap between them.
-    let (lo, hi, s) = (4.0, 13.0, 7.0);
-    els![
-        rect(lo, lo, s, s, 1.0, "", ""),
-        rect(hi, lo, s, s, 1.0, "", ""),
-        rect(lo, hi, s, s, 1.0, "", ""),
-        rect(hi, hi, s, s, 1.0, "", ""),
-    ]
+    let (lo, hi, s) = (3.5, 12.75, 7.75);
+    [(lo, lo), (hi, lo), (lo, hi), (hi, hi)].iter().map(|&(x, y)| rect(x, y, s, s, 0.75, INK, SOLID)).collect()
 }
 
 fn macos() -> Vec<String> {
@@ -35,44 +52,50 @@ fn macos() -> Vec<String> {
                 C17.3 15.1 16.4 13.6 16.5 12 C16.6 10.6 17.4 9.7 18.3 9.2 C17.2 7.7 15.5 7.2 14.3 7.5 \
                 C13.4 7.7 12.7 8 12 8.3 Z";
     let leaf = "M12.2 6.4 C12.3 4.7 13.4 3.4 15.2 3.1 C15.1 4.8 14 6.1 12.2 6.4 Z";
-    els![path(body, "", ""), path(leaf, "", "")]
+    els![path(body, INK, SOLID), path(leaf, INK, SOLID)]
 }
 
 fn linux() -> Vec<String> {
-    // A penguin: body, belly, eyes, beak and feet.
+    // A penguin: a solid body with the belly, eyes and beak cut out, standing on its feet.
     let body = "M12 3 C9.2 3 8.3 5.3 8.3 7.6 C8.3 9.4 7.2 10.6 6.4 12.4 C5.5 14.5 5.6 17.2 7.4 18.7 \
                 C8.7 19.8 10.3 20 12 20 C13.7 20 15.3 19.8 16.6 18.7 C18.4 17.2 18.5 14.5 17.6 12.4 \
                 C16.8 10.6 15.7 9.4 15.7 7.6 C15.7 5.3 14.8 3 12 3 Z";
+    let cuts = [
+        oval(12.0, 14.7, 3.2, 4.0),
+        oval(10.7, 6.4, 0.85, 1.0),
+        oval(13.3, 6.4, 0.85, 1.0),
+        "M10.9 8.5 H13.1 L12 10 Z".to_owned(),
+    ];
     els![
-        path(body, "", ""),
-        ellipse(12.0, 14.9, 2.9, 3.6, "", ""),
-        path("M10.6 6.5 h.01 M13.4 6.5 h.01", "", ""),
-        path("M11 8.6 L12 9.6 L13 8.6", "", ""),
-        path("M6.5 21 H10 M14 21 H17.5", "", ""),
+        path(&format!("{body} {}", cuts.join(" ")), INK, SOLID_CUT),
+        path(&oval(8.4, 20.3, 2.6, 1.3), INK, SOLID),
+        path(&oval(15.6, 20.3, 2.6, 1.3), INK, SOLID),
     ]
 }
 
 fn android() -> Vec<String> {
-    // The robot's head: a dome with two antennae and two eyes.
-    let (cx, cy, r) = (12.0, 17.0, 8.0);
+    // The robot's head: a solid dome with the eyes cut out, and two antennae.
+    let (cx, cy, r) = (12.0, 17.5, 8.5);
     let dome = format!("M{} {} A{} {} 0 0 1 {} {} Z", f(cx - r), f(cy), f(r), f(r), f(cx + r), f(cy));
+    let eyes = format!("{} {}", oval(9.1, 14.0, 1.0, 1.0), oval(14.9, 14.0, 1.0, 1.0));
     // The antennae leave the dome at 60 degrees from the vertical.
     let (ax, ay) = (r * 0.5, r * 0.866);
     let antennae = format!(
         "M{} {} L{} {} M{} {} L{} {}",
         f(cx - ax),
-        f(cy - ay),
-        f(cx - ax - 1.4),
-        f(cy - ay - 2.4),
+        f(cy - ay + 0.8),
+        f(cx - ax - 1.3),
+        f(cy - ay - 2.0),
         f(cx + ax),
-        f(cy - ay),
-        f(cx + ax + 1.4),
-        f(cy - ay - 2.4)
+        f(cy - ay + 0.8),
+        f(cx + ax + 1.3),
+        f(cy - ay - 2.0)
     );
-    els![path(&dome, "", ""), path(&antennae, "", ""), path("M9.2 14 h.01 M14.8 14 h.01", "", "")]
+    els![path(&format!("{dome} {eyes}"), INK, SOLID_CUT), path(&antennae, "", "")]
 }
 
 fn ios() -> Vec<String> {
-    // A phone with the camera pill at the top of its screen.
-    els![rect(6.5, 2.5, 11.0, 19.0, 2.5, "", ""), line(10.5, 5.5, 13.5, 5.5, "")]
+    // A solid phone with the camera pill cut out at the top of its screen.
+    let phone = format!("{} {}", rounded(6.0, 2.0, 12.0, 20.0, 2.75), rounded(10.0, 4.25, 4.0, 1.5, 0.75));
+    els![path(&phone, INK, SOLID_CUT)]
 }
