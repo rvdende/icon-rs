@@ -32,6 +32,19 @@ pub fn icons() -> Vec<Def> {
         def("cam-toolpath", Sketch, "Toolpath", cam_toolpath),
         def("cam-cut-path", Sketch, "Cut path", cam_cut_path),
         def("cam-drill-cycle", Sketch, "Drill cycle", cam_drill_cycle),
+        def("cam-face", Sketch, "Face toolpath", cam_face),
+        def("cam-pocket", Sketch, "Rough (pocket) toolpath", cam_pocket),
+        def("cam-adaptive", Sketch, "Adaptive clearing", cam_adaptive),
+        def("cam-profile", Sketch, "Profile toolpath", cam_profile),
+        def("cam-chamfer", Sketch, "Chamfer toolpath", cam_chamfer),
+        def("cam-engrave", Sketch, "Engrave toolpath", cam_engrave),
+        def("cam-parallel", Sketch, "Parallel finishing", cam_parallel),
+        def("cam-waterline", Sketch, "Constant Z (waterline) finishing", cam_waterline),
+        def("cam-scallop", Sketch, "Scallop finishing", cam_scallop),
+        def("cam-spiral", Sketch, "Spiral finishing", cam_spiral),
+        def("cam-pencil", Sketch, "Pencil finishing", cam_pencil),
+        def("cam-bore", Sketch, "Helical bore", cam_bore),
+        def("cam-thread", Sketch, "Thread milling", cam_thread),
         def("cam-regenerate", Line, "Regenerate toolpaths", cam_regenerate),
         def("cam-preview", Line, "Preview operation", cam_preview),
         def("cam-post", Line, "Post to G-code", cam_post),
@@ -310,6 +323,185 @@ fn cam_drill_cycle() -> Vec<String> {
         polyline(&[(3.0, 6.0), (8.0, 6.0), (8.0, 20.0), (16.0, 20.0), (16.0, 6.0), (21.0, 6.0)], ""),
         peck_line,
         dot(12.0, 17.5),
+    ]
+}
+
+fn cam_face() -> Vec<String> {
+    // The stock's top and passes across it that run off both sides.
+    let rows = [7.5, 11.5, 15.5];
+    let mut zig: Vec<P> = Vec::new();
+    for (k, y) in rows.iter().enumerate() {
+        let (a, b) = if k % 2 == 0 { (2.0, 22.0) } else { (22.0, 2.0) };
+        zig.push((a, *y));
+        zig.push((b, *y));
+    }
+    els![
+        rect(5.0, 5.0, 14.0, 13.0, 1.0, "", &dash(1.2)),
+        polyline(&zig, ""),
+        dot(2.0, 15.5),
+    ]
+}
+
+fn cam_pocket() -> Vec<String> {
+    // A pocket's wall and the rings clearing it, from the middle out.
+    els![
+        rect(3.0, 4.0, 18.0, 16.0, 3.0, "", ""),
+        rect(6.5, 7.5, 11.0, 9.0, 2.0, "", ""),
+        rect(10.0, 11.0, 4.0, 2.0, 1.0, "", ""),
+        dot(17.5, 12.0),
+    ]
+}
+
+fn cam_adaptive() -> Vec<String> {
+    // A slot cleared by little loops that each take the same bite (constant engagement), the
+    // last one still cutting.
+    let loops: Vec<P> = (0..=90)
+        .map(|k| {
+            let t = k as f64 / 90.0;
+            let a = t * std::f64::consts::TAU * 4.0;
+            (5.0 + 13.0 * t + 3.2 * a.cos(), 12.0 + 3.6 * a.sin())
+        })
+        .collect();
+    let end = *loops.last().unwrap();
+    els![
+        line(2.0, 6.5, 22.0, 6.5, ""),
+        line(2.0, 17.5, 22.0, 17.5, ""),
+        polyline(&loops, &acc(1.3)),
+        dot(end.0, end.1),
+    ]
+}
+
+fn cam_profile() -> Vec<String> {
+    // A part's outline and the cutter's path round it a radius out, led in on an arc.
+    let lead = arc_points(4.5, 15.5, 3.0, 3.0, 90.0, 180.0);
+    let start = lead[0];
+    els![
+        rect(7.0, 6.5, 12.0, 11.0, 1.0, SOFT, ""),
+        rect(4.5, 4.0, 17.0, 16.0, 3.5, "", &acc(1.5)),
+        polyline(&lead, ""),
+        dot(start.0, start.1),
+    ]
+}
+
+fn cam_chamfer() -> Vec<String> {
+    // A corner in section with its edge broken: the chamfer the cone cuts, in accent.
+    els![
+        polyline(&[(3.0, 8.0), (12.0, 8.0), (18.0, 14.0), (18.0, 21.0)], ""),
+        line(12.0, 8.0, 18.0, 14.0, &acc(2.2)),
+        dot(17.0, 9.0),
+    ]
+}
+
+fn cam_engrave() -> Vec<String> {
+    // A letter's stroke engraved into a face.
+    let s = sample_cubic((5.0, 17.0), (5.0, 3.0), (19.0, 21.0), (19.0, 7.0), 24);
+    let end = *s.last().unwrap();
+    els![
+        rect(2.5, 2.5, 19.0, 19.0, 2.0, "", &dash(1.2)),
+        polyline(&s, &acc(1.6)),
+        dot(end.0, end.1),
+    ]
+}
+
+fn cam_parallel() -> Vec<String> {
+    // A dome seen from above, diagonal raster passes laid over it.
+    let mut out = vec![circle(12.0, 12.0, 8.5, SOFT, "")];
+    let mut end = (0.0, 0.0);
+    for k in -3i32..=3 {
+        // Lines along (1, −1), a step apart across the dome.
+        let o = k as f64 * 2.4 / std::f64::consts::SQRT_2;
+        let l = (8.5f64.powi(2) - (o * std::f64::consts::SQRT_2).powi(2)).max(0.0).sqrt()
+            / std::f64::consts::SQRT_2;
+        let (a, b) = ((12.0 + o - l, 12.0 + o + l), (12.0 + o + l, 12.0 + o - l));
+        out.push(line(a.0, a.1, b.0, b.1, ""));
+        end = b;
+    }
+    els![out, dot(end.0, end.1)]
+}
+
+fn cam_waterline() -> Vec<String> {
+    // A boss from the side with level passes round it, one a level.
+    els![
+        polyline(&[(5.0, 21.0), (8.0, 5.0), (16.0, 5.0), (19.0, 21.0)], ""),
+        ellipse(12.0, 9.5, 5.6, 1.6, "", r#"fill="none""#),
+        ellipse(12.0, 14.0, 6.4, 1.8, "", r#"fill="none""#),
+        ellipse(12.0, 18.5, 7.2, 2.0, "", &acc(1.5)),
+        dot(4.8, 18.5),
+    ]
+}
+
+fn cam_scallop() -> Vec<String> {
+    // Rings an even step apart across a free-form face.
+    let blob = |s: f64| -> Vec<P> {
+        (0..=48)
+            .map(|k| {
+                let a = std::f64::consts::TAU * k as f64 / 48.0;
+                let r = s * (1.0 + 0.18 * (3.0 * a).sin());
+                (12.0 + r * a.cos(), 12.0 + r * a.sin())
+            })
+            .collect()
+    };
+    els![
+        polyline(&blob(8.5), ""),
+        polyline(&blob(5.5), ""),
+        polyline(&blob(2.5), &acc(1.5)),
+        dot(14.5, 12.0),
+    ]
+}
+
+fn cam_spiral() -> Vec<String> {
+    // One spiral out from the middle.
+    let s: Vec<P> = (0..=120)
+        .map(|k| {
+            let a = k as f64 / 120.0 * std::f64::consts::TAU * 3.2;
+            let r = 0.4 + 9.0 * k as f64 / 120.0;
+            (12.0 + r * a.cos(), 12.0 + r * a.sin())
+        })
+        .collect();
+    let end = *s.last().unwrap();
+    els![polyline(&s, ""), dot(end.0, end.1)]
+}
+
+fn cam_pencil() -> Vec<String> {
+    // Two faces meeting in a concave corner, the pass along it in accent.
+    els![
+        poly(&[(3.0, 20.0), (10.0, 13.0), (21.0, 13.0), (14.0, 20.0)], SOFT, ""),
+        poly(&[(10.0, 13.0), (10.0, 3.0), (21.0, 3.0), (21.0, 13.0)], MID, ""),
+        line(10.0, 13.0, 21.0, 13.0, &acc(2.0)),
+        dot(21.0, 13.0),
+    ]
+}
+
+fn cam_bore() -> Vec<String> {
+    // A hole in section and the helix going down it.
+    let mut helix: Vec<P> = Vec::new();
+    for k in 0..=64 {
+        let t = k as f64 / 64.0;
+        let a = t * std::f64::consts::TAU * 3.0;
+        helix.push((12.0 + 5.0 * a.cos(), 6.0 + 12.0 * t + 1.2 * a.sin()));
+    }
+    let end = *helix.last().unwrap();
+    els![
+        polyline(&[(2.5, 4.0), (5.5, 4.0), (5.5, 21.0)], ""),
+        polyline(&[(21.5, 4.0), (18.5, 4.0), (18.5, 21.0)], ""),
+        polyline(&helix, &acc(1.3)),
+        dot(end.0, end.1),
+    ]
+}
+
+fn cam_thread() -> Vec<String> {
+    // A tapped hole in section: the thread's teeth down both walls, the thread mill (a stem and
+    // its one tooth) cutting them, the tooth in accent.
+    let teeth = |x: f64, dir: f64| -> Vec<P> {
+        (0..=10)
+            .map(|k| (x + if k % 2 == 0 { 0.0 } else { dir * 2.2 }, 4.0 + 1.7 * k as f64))
+            .collect()
+    };
+    els![
+        polyline(&teeth(5.5, 1.0), ""),
+        polyline(&teeth(18.5, -1.0), ""),
+        line(12.0, 2.5, 12.0, 14.9, ""),
+        poly(&[(12.0, 11.5), (16.2, 13.2), (12.0, 14.9)], ACCENT, r#"stroke="none""#),
     ]
 }
 
