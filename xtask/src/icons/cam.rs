@@ -45,6 +45,9 @@ pub fn icons() -> Vec<Def> {
         def("cam-pencil", Sketch, "Pencil finishing", cam_pencil),
         def("cam-bore", Sketch, "Helical bore", cam_bore),
         def("cam-thread", Sketch, "Thread milling", cam_thread),
+        def("cam-flatlands", Sketch, "Flatlands (flat floors)", cam_flatlands),
+        def("cam-etch", Sketch, "Etch (marking along edges)", cam_etch),
+        def("cam-fill", Sketch, "Fill (hatching a face)", cam_fill),
         def("cam-regenerate", Line, "Regenerate toolpaths", cam_regenerate),
         def("cam-preview", Line, "Preview operation", cam_preview),
         def("cam-post", Line, "Post to G-code", cam_post),
@@ -503,6 +506,37 @@ fn cam_thread() -> Vec<String> {
         line(12.0, 2.5, 12.0, 14.9, ""),
         poly(&[(12.0, 11.5), (16.2, 13.2), (12.0, 14.9)], ACCENT, r#"stroke="none""#),
     ]
+}
+
+fn cam_flatlands() -> Vec<String> {
+    // A step in section: only its flat floors get the passes (accent), the wall none.
+    els![
+        polyline(&[(2.0, 9.0), (11.0, 9.0), (11.0, 17.0), (22.0, 17.0)], ""),
+        line(3.0, 6.5, 9.5, 6.5, &acc(1.8)),
+        line(12.5, 14.5, 21.0, 14.5, &acc(1.8)),
+        dot(21.0, 14.5),
+    ]
+}
+
+fn cam_etch() -> Vec<String> {
+    // A part's outline marked by the beam, dashed (on the line, no kerf).
+    els![
+        rect(4.0, 5.0, 16.0, 14.0, 3.0, "", &dash(1.6)),
+        circle(12.0, 12.0, 2.6, "", ""),
+        dot(4.0, 12.0),
+    ]
+}
+
+fn cam_fill() -> Vec<String> {
+    // A face hatched by the beam, line after line.
+    let mut out = vec![circle(12.0, 12.0, 8.5, "", "")];
+    for k in 0..6 {
+        let y = 6.5 + 2.2 * k as f64;
+        let dy = (y - 12.0f64).abs();
+        let half = (8.5f64.powi(2) - dy * dy).max(0.0).sqrt() - 1.2;
+        out.push(line(12.0 - half, y, 12.0 + half, y, &acc(1.2)));
+    }
+    els![out, dot(12.0 - 6.0, 17.5)]
 }
 
 fn cam_regenerate() -> Vec<String> {
