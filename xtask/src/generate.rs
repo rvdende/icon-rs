@@ -27,6 +27,7 @@ pub const MODULES: &[Module] = &[
     ("ui_a", icons::ui_a::icons),
     ("ui_b", icons::ui_b::icons),
     ("eda", icons::eda::icons),
+    ("cam", icons::cam::icons),
     ("platform", icons::platform::icons),
 ];
 

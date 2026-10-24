@@ -59,7 +59,7 @@ The icons are drawn in Rust by the generator in `xtask/`, a workspace crate that
   geometry helpers. `src/palette.rs` holds the crate's `Rgb` and `Palette`; the generator includes
   it too, and a test keeps the two palettes in step.
 - `xtask/src/icons/`: one module per family (`part`, `sheet_metal`, `assembly`, `sketch`, `glyphs`,
-  `ui_a`, `ui_b`, `eda` for schematic and PCB layout, `platform` for operating systems and code hosting). Each icon is a function returning its SVG
+  `ui_a`, `ui_b`, `eda` for schematic and PCB layout, `cam` for machining, `platform` for operating systems and code hosting). Each icon is a function returning its SVG
   elements, listed in the module's `icons()` in toolbar order.
 
 ```sh

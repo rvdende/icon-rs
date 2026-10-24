@@ -32,6 +32,7 @@ Each family is one module in `xtask/src/icons/`:
 | `ui_a`        | Navigation, actions and status                                    |
 | `ui_b`        | Documents, folders, panels, people and objects                    |
 | `eda`         | Schematic and PCB layout tools                                    |
+| `cam`         | Machining: machines, cutters, setups, toolpaths and their commands |
 | `platform`    | Operating systems, devices and code hosting, for download buttons |
 
 Read the comment at the top of the module before you start: it describes that family's house
