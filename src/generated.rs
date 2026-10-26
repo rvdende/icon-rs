@@ -73,6 +73,7 @@ icons! {
     PART_STUDIO => ("part-studio", Solid, "Part Studio"),
     MATERIAL_LIBRARY => ("material-library", Solid, "Material library"),
     FEATURE_STUDIO => ("feature-studio", Solid, "Feature Studio"),
+    VARIABLE_STUDIO => ("variable-studio", Solid, "Variable Studio"),
     CAM_STUDIO => ("cam-studio", Solid, "CAM Studio"),
     PCB_STUDIO => ("pcb-studio", Solid, "PCB Studio"),
     RENDER_STUDIO => ("render-studio", Solid, "Render Studio"),

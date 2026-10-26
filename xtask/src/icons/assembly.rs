@@ -39,6 +39,7 @@ pub fn icons() -> Vec<Def> {
         def("part-studio", Solid, "Part Studio", part_studio),
         def("material-library", Solid, "Material library", material_library),
         def("feature-studio", Solid, "Feature Studio", feature_studio),
+        def("variable-studio", Solid, "Variable Studio", variable_studio),
         def("cam-studio", Solid, "CAM Studio", cam_studio),
         def("pcb-studio", Solid, "PCB Studio", pcb_studio),
         def("render-studio", Solid, "Render Studio", render_studio),
@@ -599,6 +600,18 @@ fn feature_studio() -> Vec<String> {
         polyline(&[(8.8, 5.0), (5.4, 8.6), (8.8, 12.2)], &code),
         polyline(&[(15.2, 5.0), (18.6, 8.6), (15.2, 12.2)], &code),
         line(13.0, 4.2, 11.0, 13.0, &code),
+    ]
+}
+
+fn variable_studio() -> Vec<String> {
+    // The variables glyph (an italic f and an x) over the studio's platform.
+    let o = DOC_O;
+    let x = acc(r#"stroke-width="1.8""#);
+    els![
+        platform(o),
+        path("M13.4 3.6 C12.3 3 11 3.4 10.7 4.8 L9.2 12.6 C8.9 14 7.7 14.4 6.6 13.8", "", r#"stroke-width="1.8""#),
+        path("M8 7.6 H12.6", "", r#"stroke-width="1.8""#),
+        path("M13.6 8 L17.6 12.6 M17.6 8 L13.6 12.6", "", &x),
     ]
 }
 
