@@ -74,6 +74,12 @@ pub fn icons() -> Vec<Def> {
         def("cloud-upload", Line, "Upload to cloud", cloud_upload),
         def("upload", Line, "Upload", upload),
         def("download", Line, "Download", download),
+        def("network", Line, "Network", network),
+        def("network-rx", Line, "Network receiving", network_rx),
+        def("network-tx", Line, "Network sending", network_tx),
+        def("network-rx-tx", Line, "Network receiving and sending", network_rx_tx),
+        def("network-error", Line, "Network error", network_error),
+        def("network-disconnected", Line, "Network disconnected", network_disconnected),
         def("theme-light", Line, "Light theme", theme_light),
         def("theme-dark", Line, "Dark theme", theme_dark),
         def("theme-system", Line, "System theme", theme_system),
@@ -221,6 +227,26 @@ fn gapped(ps: &[P], a: P, b: P, gap: f64, closed: bool) -> Vec<String> {
         }
     }
     runs.iter().filter(|r| r.len() > 1).map(|r| polyline(r, "")).collect()
+}
+
+/// `ps` with points added along every edge at most `step` apart, so `gapped` can cut straight
+/// edges. A closed list gets points along its closing edge too, without repeating the first.
+fn dense(ps: &[P], step: f64, closed: bool) -> Vec<P> {
+    let n = ps.len();
+    let edges = if closed { n } else { n - 1 };
+    let mut out = Vec::new();
+    for i in 0..edges {
+        let (a, b) = (ps[i], ps[(i + 1) % n]);
+        let k = ((hypot(b.0 - a.0, b.1 - a.1) / step).ceil() as usize).max(1);
+        out.extend((0..k).map(|j| {
+            let t = j as f64 / k as f64;
+            (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
+        }));
+    }
+    if !closed {
+        out.push(ps[n - 1]);
+    }
+    out
 }
 
 fn eye_pts(n: usize) -> Vec<P> {
@@ -704,4 +730,67 @@ fn theme_system() -> Vec<String> {
         path("M12 6 H17.5 A1.5 1.5 0 0 1 19 7.5 V12.5 A1.5 1.5 0 0 1 17.5 14 H12 Z", INK, r#"stroke="none""#),
         path("M12 16.5 V20.5 M8 20.5 H16", "", ""),
     ]
+}
+
+
+
+// ---------------------------------------------------------------------------------------------
+// Network activity: an up arrow for what is sent and a down arrow for what is received. An arrow
+// lights up while traffic flows its way: accent, with its head filled, so it stands out even
+// when the app tints the whole icon one colour. The arrows never move, so an app can swap the
+// icons as the traffic changes.
+
+const TX_X: f64 = 8.0; // the up arrow's centre line
+const RX_X: f64 = 16.0; // the down arrow's
+
+/// The arrow from `tail` to `tip` on centre line x: open while idle, filled while lit.
+fn traffic(x: f64, tail: f64, tip: f64, lit: bool) -> Vec<String> {
+    if !lit {
+        return open_arrow(x, tail, x, tip, 4.0);
+    }
+    let s = (tip - tail).signum();
+    let base = tip - 6.0 * s;
+    let head = [(x, tip + 0.6 * s), (x + 4.4, base), (x - 4.4, base)];
+    acc_all(els![line(x, tail, x, base, ""), poly(&rounded(&head, 0.6), INK, "")])
+}
+
+fn arrows(tx: bool, rx: bool) -> Vec<String> {
+    els![traffic(TX_X, 20.0, 4.0, tx), traffic(RX_X, 4.0, 20.0, rx)]
+}
+
+fn network() -> Vec<String> {
+    arrows(false, false)
+}
+
+fn network_rx() -> Vec<String> {
+    arrows(false, true)
+}
+
+fn network_tx() -> Vec<String> {
+    arrows(true, false)
+}
+
+fn network_rx_tx() -> Vec<String> {
+    arrows(true, true)
+}
+
+fn network_error() -> Vec<String> {
+    // An exclamation mark in the free corner beside the down arrow's tail.
+    let x = 20.25;
+    els![arrows(false, false), acc_all(els![line(x, 4.0, x, 9.5, ""), line(x, 13.0, x, 13.01, "")])]
+}
+
+fn network_disconnected() -> Vec<String> {
+    // The idle arrows struck through, broken where the slash runs over them. It runs from bottom
+    // left to top right so that it crosses each shaft once and misses both heads.
+    let (a, b) = ((4.0, 20.0), (20.0, 4.0));
+    let mut out = Vec::new();
+    for (x, tail, tip) in [(TX_X, 20.0_f64, 4.0), (RX_X, 4.0, 20.0)] {
+        let s = (tip - tail).signum();
+        let head = [(x - 4.0, tip - 4.0 * s), (x, tip), (x + 4.0, tip - 4.0 * s)];
+        out.extend(gapped(&dense(&[(x, tail), (x, tip)], 0.2, false), a, b, 2.2, false));
+        out.extend(gapped(&dense(&head, 0.2, false), a, b, 2.2, false));
+    }
+    out.push(acc(seg(a, b, "")));
+    out
 }
