@@ -32,6 +32,7 @@ pub fn icons() -> Vec<Def> {
         def("sort-descending", Line, "Sort descending", sort_descending),
         def("reorder", Line, "Reorder", reorder),
         def("drag-handle", Line, "Drag handle", drag_handle),
+        def("cursor", Line, "Cursor", cursor),
         def("arrow-up", Line, "Arrow up", arrow_up),
         def("arrow-down", Line, "Arrow down", arrow_down),
         def("arrow-up-right", Line, "Arrow up-right", arrow_up_right),
@@ -376,6 +377,13 @@ fn sort_descending() -> Vec<String> {
 fn reorder() -> Vec<String> {
     // Up and down arrows side by side: toggles reordering a list. A control, so ink only.
     els![open_arrow(8.5, 19.0, 8.5, 5.0, 3.5), open_arrow(15.5, 5.0, 15.5, 19.0, 3.5)]
+}
+
+fn cursor() -> Vec<String> {
+    // A filled arrow pointer, its tip (the hotspot) at 5,2.5: a collaborator's pointer, which
+    // apps tint in that person's colour. A single mark, so ink only.
+    let arrow = [(5.0, 2.5), (17.8, 14.4), (12.3, 14.4), (15.2, 20.4), (12.2, 21.7), (9.3, 15.6), (5.0, 19.6)];
+    els![path(&d(&rounded(&arrow, 0.9), true), INK, r#"stroke="none""#)]
 }
 
 fn drag_handle() -> Vec<String> {
