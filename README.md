@@ -38,7 +38,7 @@ let html: String = UNDO.current_color();
 Enable the `bevy_color` feature to pass Bevy colours straight in and get them back out:
 
 ```toml
-icon-rs = { version = "0.4", features = ["bevy_color"] }
+icon-rs = { version = "0.5", features = ["bevy_color"] }
 ```
 
 ```rust

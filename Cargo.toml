@@ -1,6 +1,6 @@
 [package]
 name = "icon-rs"
-version = "0.4.8"
+version = "0.5.0"
 edition = "2024"
 description = "SVG icons for CAD apps: isometric features and mates, sketch tools, constraint glyphs and UI icons"
 license = "MIT OR Apache-2.0"
@@ -23,7 +23,7 @@ name = "icon_rs"
 bevy_color = ["dep:bevy_color"]
 
 [dependencies]
-bevy_color = { version = "0.19", optional = true, default-features = false, features = ["std"] }
+bevy_color = { version = "0.20", optional = true, default-features = false, features = ["std"] }
 
 [dev-dependencies]
 resvg = "0.48"
