@@ -14,6 +14,7 @@ icons! {
     SHELL => ("shell", Solid, "Shell"),
     HOLE => ("hole", Solid, "Hole"),
     THREAD => ("thread", Solid, "Thread"),
+    GEAR => ("gear", Solid, "Gear"),
     LINEAR_PATTERN => ("linear-pattern", Solid, "Linear pattern"),
     CIRCULAR_PATTERN => ("circular-pattern", Solid, "Circular pattern"),
     BOOLEAN => ("boolean", Solid, "Boolean"),

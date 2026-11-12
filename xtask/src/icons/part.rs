@@ -22,6 +22,7 @@ pub fn icons() -> Vec<Def> {
         def("shell", Solid, "Shell", shell),
         def("hole", Solid, "Hole", hole),
         def("thread", Solid, "Thread", thread),
+        def("gear", Solid, "Gear", gear),
         def("linear-pattern", Solid, "Linear pattern", linear_pattern),
         def("circular-pattern", Solid, "Circular pattern", circular_pattern),
         def("boolean", Solid, "Boolean", boolean),
@@ -328,6 +329,31 @@ fn thread() -> Vec<String> {
         &arc_points_step(ox, oy - zt, rx, ry, 0.0, 180.0, 6.0)[1..],
     ]);
     els![cylinder(o, 0.0, 0.0, 0.0, h, r), poly(&band, ACCENT, "")]
+}
+
+fn gear() -> Vec<String> {
+    // Context: the blank's hub and bore. Output: the teeth, a solid accent face with a toothed
+    // silhouette.
+    let o = (12.0, 12.6);
+    let p = projector(o);
+    let (r_out, r_root, h, teeth) = (7.0, 5.0, 2.6, 8);
+    let w = 2.0 * PI / teeth as f64;
+    let mut g = Vec::new();
+    for k in 0..teeth {
+        let a = w * (k as f64 + 0.2);
+        for (t, r) in [(0.0, r_root), (0.17, r_out), (0.5, r_out), (0.67, r_root)] {
+            g.push((r * (a + t * w).cos(), r * (a + t * w).sin()));
+        }
+    }
+    let at = |z: f64| g.iter().map(|&(u, v)| p(u, v, z)).collect::<Vec<P>>();
+    let side: Vec<String> = (1..4).map(|i| poly(&at(h * i as f64 / 4.0), MID, r#"stroke="none""#)).collect();
+    els![
+        poly(&at(0.0), MID, ""),
+        side,
+        poly(&at(h), ACCENT, ""),
+        poly(&iso_circle(o, 0.0, 0.0, h, 0.66 * r_root, 40), TOP, THIN),
+        poly(&iso_circle(o, 0.0, 0.0, h, 0.28 * r_root, 24), SHADE, THIN),
+    ]
 }
 
 fn linear_pattern() -> Vec<String> {
